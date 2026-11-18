@@ -15,7 +15,8 @@ public final class Dtos {
     public record LineDto(String id, String name, String color, String from, String to) { }
 
     public record StationDto(String id, String name, double lat, double lng, List<String> lines,
-                             boolean interchange, boolean approximate) { }
+                             boolean interchange, boolean approximate,
+                             java.util.Map<String, Integer> order) { }
 
     public record StationsResponse(List<LineDto> lines, List<StationDto> stations, double transferMinutes) { }
 

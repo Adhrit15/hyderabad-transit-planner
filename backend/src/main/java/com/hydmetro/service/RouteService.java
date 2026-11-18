@@ -36,7 +36,8 @@ public class RouteService {
             lines.add(new LineDto(l.id(), l.name(), l.color(), t[0], t[1]));
         }
         List<StationDto> st = graph.stations().stream()
-                .map(s -> new StationDto(s.getId(), s.getName(), s.getLat(), s.getLng(), s.getLineIds(), s.isInterchange(), s.isApproximate()))
+                .map(s -> new StationDto(s.getId(), s.getName(), s.getLat(), s.getLng(), s.getLineIds(), s.isInterchange(), s.isApproximate(),
+                        orderMap(s)))
                 .toList();
         return new StationsResponse(lines, st, graph.transferMinutes());
     }
@@ -181,6 +182,12 @@ public class RouteService {
             if (names.isEmpty() || !names.get(names.size() - 1).equals(n)) names.add(n);
         }
         return names;
+    }
+
+    private static Map<String, Integer> orderMap(Station s) {
+        Map<String, Integer> m = new LinkedHashMap<>();
+        for (String l : s.getLineIds()) if (s.orderOn(l) != null) m.put(l, s.orderOn(l));
+        return m;
     }
 
     private static StationRef ref(Station s) { return new StationRef(s.getId(), s.getName()); }
