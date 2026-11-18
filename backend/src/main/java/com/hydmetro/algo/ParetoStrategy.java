@@ -13,7 +13,7 @@ import java.util.List;
  */
 public final class ParetoStrategy implements RouteStrategy {
     @Override public String id() { return "pareto"; }
-    @Override public String displayName() { return "Pareto (time × transfers)"; }
+    @Override public String displayName() { return "Pareto (time x transfers)"; }
 
     @Override
     public SearchResult search(Graph g, String fromId, String toId, SearchOptions opt) {

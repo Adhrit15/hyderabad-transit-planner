@@ -1,0 +1,17 @@
+
+Metro graph: 56 stations, 59 nodes, 118 directed edges, 100 random queries (seed 42)
+| Strategy | avg nodes expanded | avg us/query | total ms |
+|---|---:|---:|---:|
+| Dijkstra (fastest) | 29.9 | 8.3 | 0.83 |
+| A* (haversine heuristic) | 23.9 | 9.9 | 0.99 |
+| 0-1 BFS (fewest transfers) | 60.1 | 7.4 | 0.74 |
+| Cheapest (fare slabs) | 59.5 | 28.2 | 2.82 |
+| Pareto (time x transfers) | 35.3 | 20.8 | 2.08 |
+| Dijkstra (PriorityQueue, lazy deletion) | 29.9 | 6.9 | 0.69 |
+
+Heap comparison on a 120x120 grid (28800 nodes, 85920 edges), 200 queries
+| Dijkstra variant | avg ms/query | avg nodes expanded |
+|---|---:|---:|
+| Dijkstra (fastest) | 3.365 | 14281 |
+| Dijkstra (PriorityQueue, lazy deletion) | 4.010 | 14281 |
+| A* (haversine heuristic) | 3.861 | 11214 |
