@@ -1,0 +1,775 @@
+{
+  "transferMinutes": 5,
+  "maxTrainSpeedKmph": 80,
+  "lines": [
+    {
+      "id": "RED",
+      "name": "Red Line",
+      "color": "#e53935",
+      "publishedKm": 29.2,
+      "from": "Miyapur",
+      "to": "LB Nagar",
+      "stationCount": 27
+    },
+    {
+      "id": "BLUE",
+      "name": "Blue Line",
+      "color": "#1e88e5",
+      "publishedKm": 27,
+      "from": "Nagole",
+      "to": "Raidurg",
+      "stationCount": 23
+    },
+    {
+      "id": "GREEN",
+      "name": "Green Line",
+      "color": "#43a047",
+      "publishedKm": 11,
+      "from": "JBS Parade Ground",
+      "to": "MG Bus Station",
+      "stationCount": 9
+    }
+  ],
+  "stations": [
+    {
+      "id": "miyapur",
+      "name": "Miyapur",
+      "lat": 17.4968,
+      "lng": 78.3727,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 1
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "jntu-college",
+      "name": "JNTU College",
+      "lat": 17.4932,
+      "lng": 78.3885,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 2
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "kphb-colony",
+      "name": "KPHB Colony",
+      "lat": 17.4876,
+      "lng": 78.3957,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 3
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "kukatpally",
+      "name": "Kukatpally",
+      "lat": 17.4849,
+      "lng": 78.4115,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 4
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "balanagar",
+      "name": "Dr. B.R. Ambedkar Balanagar",
+      "lat": 17.4775,
+      "lng": 78.4235,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 5
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "moosapet",
+      "name": "Moosapet",
+      "lat": 17.4717,
+      "lng": 78.429,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 6
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "bharat-nagar",
+      "name": "Bharat Nagar",
+      "lat": 17.4645,
+      "lng": 78.4345,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 7
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "erragadda",
+      "name": "Erragadda",
+      "lat": 17.457,
+      "lng": 78.4365,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 8
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "esi-hospital",
+      "name": "ESI Hospital",
+      "lat": 17.4478,
+      "lng": 78.439,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 9
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "sr-nagar",
+      "name": "S.R. Nagar",
+      "lat": 17.4416,
+      "lng": 78.4437,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 10
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "ameerpet",
+      "name": "Ameerpet",
+      "lat": 17.4375,
+      "lng": 78.4482,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 11
+        },
+        {
+          "line": "BLUE",
+          "order": 14
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "punjagutta",
+      "name": "Punjagutta",
+      "lat": 17.4287,
+      "lng": 78.4508,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 12
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "irrum-manzil",
+      "name": "Irrum Manzil",
+      "lat": 17.421,
+      "lng": 78.4547,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 13
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "khairatabad",
+      "name": "Khairatabad",
+      "lat": 17.4134,
+      "lng": 78.4609,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 14
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "lakdikapul",
+      "name": "Lakdikapul",
+      "lat": 17.4046,
+      "lng": 78.4655,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 15
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "assembly",
+      "name": "Assembly",
+      "lat": 17.3997,
+      "lng": 78.47,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 16
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "nampally",
+      "name": "Nampally",
+      "lat": 17.3925,
+      "lng": 78.4713,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 17
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "gandhi-bhavan",
+      "name": "Gandhi Bhavan",
+      "lat": 17.3862,
+      "lng": 78.4752,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 18
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "osmania-medical-college",
+      "name": "Osmania Medical College",
+      "lat": 17.381,
+      "lng": 78.48,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 19
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "mg-bus-station",
+      "name": "MG Bus Station",
+      "lat": 17.3784,
+      "lng": 78.484,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 20
+        },
+        {
+          "line": "GREEN",
+          "order": 9
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "malakpet",
+      "name": "Malakpet",
+      "lat": 17.3735,
+      "lng": 78.4935,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 21
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "new-market",
+      "name": "New Market",
+      "lat": 17.3705,
+      "lng": 78.5005,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 22
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "musarambagh",
+      "name": "Musarambagh",
+      "lat": 17.3711,
+      "lng": 78.5102,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 23
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "dilsukhnagar",
+      "name": "Dilsukhnagar",
+      "lat": 17.3689,
+      "lng": 78.526,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 24
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "chaitanyapuri",
+      "name": "Chaitanyapuri",
+      "lat": 17.3682,
+      "lng": 78.5363,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 25
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "victoria-memorial",
+      "name": "Victoria Memorial",
+      "lat": 17.3612,
+      "lng": 78.545,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 26
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "lb-nagar",
+      "name": "LB Nagar",
+      "lat": 17.3489,
+      "lng": 78.549,
+      "lines": [
+        {
+          "line": "RED",
+          "order": 27
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "nagole",
+      "name": "Nagole",
+      "lat": 17.391,
+      "lng": 78.5594,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 1
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "uppal",
+      "name": "Uppal",
+      "lat": 17.4005,
+      "lng": 78.5585,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 2
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "stadium",
+      "name": "Stadium",
+      "lat": 17.406,
+      "lng": 78.55,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 3
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "ngri",
+      "name": "NGRI",
+      "lat": 17.4108,
+      "lng": 78.5428,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 4
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "habsiguda",
+      "name": "Habsiguda",
+      "lat": 17.4176,
+      "lng": 78.5375,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 5
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "tarnaka",
+      "name": "Tarnaka",
+      "lat": 17.428,
+      "lng": 78.531,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 6
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "mettuguda",
+      "name": "Mettuguda",
+      "lat": 17.4352,
+      "lng": 78.5196,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 7
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "secunderabad-east",
+      "name": "Secunderabad East",
+      "lat": 17.4362,
+      "lng": 78.508,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 8
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "parade-ground",
+      "name": "Parade Ground",
+      "lat": 17.444,
+      "lng": 78.4985,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 9
+        },
+        {
+          "line": "GREEN",
+          "order": 1
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "paradise",
+      "name": "Paradise",
+      "lat": 17.4433,
+      "lng": 78.4885,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 10
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "rasoolpura",
+      "name": "Rasoolpura",
+      "lat": 17.444,
+      "lng": 78.4775,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 11
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "prakash-nagar",
+      "name": "Prakash Nagar",
+      "lat": 17.4441,
+      "lng": 78.4655,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 12
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "begumpet",
+      "name": "Begumpet",
+      "lat": 17.4404,
+      "lng": 78.458,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 13
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "madhura-nagar",
+      "name": "Madhura Nagar",
+      "lat": 17.4385,
+      "lng": 78.4385,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 15
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "yusufguda",
+      "name": "Yusufguda",
+      "lat": 17.435,
+      "lng": 78.4265,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 16
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "jubilee-hills-road-5",
+      "name": "Road No. 5 Jubilee Hills",
+      "lat": 17.4302,
+      "lng": 78.4195,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 17
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "jubilee-hills-check-post",
+      "name": "Jubilee Hills Check Post",
+      "lat": 17.429,
+      "lng": 78.4115,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 18
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "peddamma-gudi",
+      "name": "Peddamma Gudi",
+      "lat": 17.4312,
+      "lng": 78.402,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 19
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "madhapur",
+      "name": "Madhapur",
+      "lat": 17.4375,
+      "lng": 78.395,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 20
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "durgam-cheruvu",
+      "name": "Durgam Cheruvu",
+      "lat": 17.4437,
+      "lng": 78.3874,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 21
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "hitec-city",
+      "name": "HITEC City",
+      "lat": 17.4497,
+      "lng": 78.3811,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 22
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "raidurg",
+      "name": "Raidurg",
+      "lat": 17.4412,
+      "lng": 78.3777,
+      "lines": [
+        {
+          "line": "BLUE",
+          "order": 23
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "secunderabad-west",
+      "name": "Secunderabad West",
+      "lat": 17.4352,
+      "lng": 78.499,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 2
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "gandhi-hospital",
+      "name": "Gandhi Hospital",
+      "lat": 17.4245,
+      "lng": 78.5025,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 3
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "musheerabad",
+      "name": "Musheerabad",
+      "lat": 17.417,
+      "lng": 78.5,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 4
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "rtc-x-roads",
+      "name": "RTC X Roads",
+      "lat": 17.4065,
+      "lng": 78.4975,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 5
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "chikkadpally",
+      "name": "Chikkadpally",
+      "lat": 17.4005,
+      "lng": 78.495,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 6
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "narayanguda",
+      "name": "Narayanguda",
+      "lat": 17.3925,
+      "lng": 78.489,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 7
+        }
+      ],
+      "approximate": true
+    },
+    {
+      "id": "sultan-bazaar",
+      "name": "Sultan Bazaar",
+      "lat": 17.3845,
+      "lng": 78.4862,
+      "lines": [
+        {
+          "line": "GREEN",
+          "order": 8
+        }
+      ],
+      "approximate": true
+    }
+  ]
+}
