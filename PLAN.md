@@ -17,13 +17,13 @@ frontend/  React + Vite + Leaflet  ──HTTP──▶  backend/  Spring Boot RE
 ```
 
 * **backend/** (Gradle, Java 17 target)
-  * `in.metro.model`: `Station`, `Line`, `Node` (station × line), `Edge`, `Graph`, `GraphLoader`
-  * `in.metro.heap`: `BinaryMinHeap` (array plus an index map, so decrease-key runs in O(log n))
-  * `in.metro.algo`: `RouteStrategy` interface, plus `Dijkstra`, `AStar`, `ZeroOneBfs`,
+  * `com.hydmetro.model`: `Station`, `Line`, `Node` (station × line), `Edge`, `Graph`, `GraphLoader`
+  * `com.hydmetro.heap`: `BinaryMinHeap` (array plus an index map, so decrease-key runs in O(log n))
+  * `com.hydmetro.algo`: `RouteStrategy` interface, plus `Dijkstra`, `AStar`, `ZeroOneBfs`,
     `Cheapest`, `Pareto` and `FloydWarshall` (FloydWarshall is used only by the tests)
-  * `in.metro.fare`: `FareCalculator` (distance slabs)
-  * `in.metro.api`: Spring Boot controllers, DTOs and the global error handler
-  * `in.metro.bench`: `Benchmark` main class (`./gradlew bench`)
+  * `com.hydmetro.fare`: `FareCalculator` (distance slabs)
+  * `com.hydmetro.api`: Spring Boot controllers, DTOs and the global error handler
+  * `com.hydmetro.bench`: `Benchmark` main class (`./gradlew bench`)
 * **frontend/**: Vite + React + react-leaflet. It has a map, pickers, a route panel, a trace
   visualiser and a compare view.
 * **.github/workflows/**: CI (Gradle test + frontend build) and a GitHub Pages deploy.

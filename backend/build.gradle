@@ -1,0 +1,44 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.6'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.hydmetro'
+version = '1.0.0'
+
+java {
+    // Compile for Java 17 bytecode so the jar runs on any JDK >= 17.
+    toolchain { languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion as int) }
+}
+tasks.withType(JavaCompile).configureEach { options.release = 17; options.encoding = 'UTF-8' }
+
+// Gradle's test worker cannot load classes from a path containing an apostrophe
+// (this repo lives in "D:\Djikstra's" on the author's machine). In that case, build elsewhere.
+if (projectDir.absolutePath.contains("'")) {
+    layout.buildDirectory = file("${System.getProperty('java.io.tmpdir')}/hydmetro-build")
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging { events 'failed'; exceptionFormat 'full' }
+}
+
+// ./gradlew bench : runs 100 random queries per strategy and a heap micro-benchmark.
+tasks.register('bench', JavaExec) {
+    group = 'verification'
+    description = 'Benchmarks route strategies and BinaryMinHeap vs PriorityQueue'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.hydmetro.bench.Benchmark'
+}
