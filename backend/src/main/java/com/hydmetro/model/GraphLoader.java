@@ -34,6 +34,7 @@ public final class GraphLoader {
         for (JsonNode s : st.get("stations")) {
             b.station(s.get("id").asText(), s.get("name").asText(), s.get("lat").asDouble(), s.get("lng").asDouble(),
                     s.path("approximate").asBoolean(false));
+            for (JsonNode lo : s.path("lines")) b.order(s.get("id").asText(), lo.get("line").asText(), lo.get("order").asInt());
         }
         for (JsonNode e : ed.get("edges")) {
             b.ride(e.get("from").asText(), e.get("to").asText(), e.get("line").asText(),

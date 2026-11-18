@@ -90,6 +90,7 @@ public final class Graph {
         private final Map<String, double[]> stationCoords = new HashMap<>();
         private final Map<String, String> stationNames = new HashMap<>();
         private final Map<String, Boolean> stationApprox = new HashMap<>();
+        private final Map<String, Map<String, Integer>> stationOrder = new HashMap<>();
         private final Map<String, List<Node>> nodesByStation = new HashMap<>();
         private final Map<String, Integer> nodeIndex = new HashMap<>();
         private final Map<String, Line> lines = new LinkedHashMap<>();
@@ -107,6 +108,12 @@ public final class Graph {
             this.maxSpeedKmph = v; return this;
         }
         public Builder line(String id, String name, String color) { lines.put(id, new Line(id, name, color)); return this; }
+
+        /** Records that station {@code id} is the {@code order}-th station on {@code lineId} (used for directions). */
+        public Builder order(String id, String lineId, int order) {
+            stationOrder.computeIfAbsent(id, k -> new HashMap<>()).put(lineId, order);
+            return this;
+        }
 
         public Builder station(String id, String name, double lat, double lng) { return station(id, name, lat, lng, false); }
 
@@ -136,7 +143,8 @@ public final class Graph {
             // 1. Freeze stations now that we know which lines serve them.
             stationLines.forEach((id, ls) -> {
                 double[] c = stationCoords.get(id);
-                stations.put(id, new Station(id, stationNames.get(id), c[0], c[1], stationApprox.get(id), ls));
+                stations.put(id, new Station(id, stationNames.get(id), c[0], c[1], stationApprox.get(id), ls,
+                        stationOrder.getOrDefault(id, Map.of())));
             });
             // 2. One node per (station, line). A station with no lines still gets one "isolated"
             //    node so that it can be queried (it is simply unreachable).
