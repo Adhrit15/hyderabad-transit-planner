@@ -1,0 +1,68 @@
+{
+  "$comment": "Source registry. Add a source here and the pipeline picks it up. 'trust' (0-100) breaks ties between sources that cover the same thing; for attributes, a newer 'effectiveFrom' always wins first. 'critical' sources must load (fresh or last-good), or the build fails and the live site stays unchanged.",
+  "sources": [
+    {
+      "id": "tgsrtc-gtfs",
+      "kind": "gtfs",
+      "name": "TGSRTC city bus timetable (Open Data Telangana)",
+      "covers": ["bus"],
+      "urls": [
+        "https://files.mobilitydatabase.org/mdb-3361/latest.zip"
+      ],
+      "homepage": "https://mobilitydatabase.org/feeds/gtfs/mdb-3361",
+      "licence": "Open Data Telangana (public domain per OpenCity listing)",
+      "attribution": "Contains data from TGSRTC via Open Data Telangana",
+      "trust": 70,
+      "critical": true,
+      "repair": { "retimeOutsideKmph": [8, 35] }
+    },
+    {
+      "id": "hmrl-gtfs",
+      "kind": "gtfs",
+      "name": "Hyderabad Metro Rail timetable and stations (HMRL)",
+      "covers": ["metro"],
+      "urls": [
+        "https://files.mobilitydatabase.org/mdb-2457/latest.zip"
+      ],
+      "homepage": "https://hmrl.co.in/open-data.html",
+      "licence": "HMRL open data (redistribution with attribution)",
+      "attribution": "Contains data provided by Hyderabad Metro Rail Ltd.",
+      "trust": 90,
+      "critical": true
+    },
+    {
+      "id": "mmts-gtfs",
+      "kind": "gtfs",
+      "name": "MMTS suburban rail timetable (Open Data Telangana, 2019)",
+      "covers": ["mmts"],
+      "urls": [
+        "https://files.mobilitydatabase.org/mdb-921/latest.zip"
+      ],
+      "homepage": "https://www.transit.land/feeds/f-mmts~hyderabad",
+      "licence": "CDLA-Permissive-1.0",
+      "attribution": "Contains data from Open Data Telangana",
+      "trust": 60,
+      "critical": false
+    },
+    {
+      "id": "osm-auto-stands",
+      "kind": "overpass",
+      "name": "Auto / taxi stands mapped in OpenStreetMap",
+      "covers": ["auto-points"],
+      "urls": ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter"],
+      "query": "[out:json][timeout:60];node[\"amenity\"=\"taxi\"](17.15,78.15,17.70,78.75);out body;",
+      "licence": "ODbL 1.0",
+      "attribution": "© OpenStreetMap contributors",
+      "trust": 50,
+      "critical": false
+    },
+    { "id": "metro-fares-2025", "kind": "manual", "file": "manual/metro-fares-2025.json", "covers": ["fare:metro"], "trust": 80, "critical": true },
+    { "id": "hmrl-gtfs-fares", "kind": "derived", "from": "hmrl-gtfs", "covers": ["fare:metro"], "trust": 90, "critical": false },
+    { "id": "bus-fares", "kind": "manual", "file": "manual/bus-fares.json", "covers": ["fare:bus"], "trust": 50, "critical": true },
+    { "id": "mmts-fares", "kind": "manual", "file": "manual/mmts-fares.json", "covers": ["fare:mmts"], "trust": 50, "critical": true },
+    { "id": "road-fares", "kind": "manual", "file": "manual/road-fares.json", "covers": ["fare:auto", "fare:cab", "fare:share-auto"], "trust": 50, "critical": true },
+    { "id": "traffic-profile", "kind": "manual", "file": "manual/traffic-profile.json", "covers": ["traffic"], "trust": 40, "critical": true },
+    { "id": "community-auto-points", "kind": "manual", "file": "manual/auto-points.csv", "covers": ["auto-points"], "trust": 60, "critical": false },
+    { "id": "patches", "kind": "manual", "file": "manual/patches.json", "covers": ["patches"], "trust": 100, "critical": false }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "currency": "INR",
+  "auto": {
+    "effectiveFrom": "2025-12-01",
+    "approximate": false,
+    "note": "Government meter tariff: ₹30 for the first 1.6 km, then ₹14 per km, and 1.5× from 11 pm to 5 am. Drivers often quote above the meter; the UI shows the meter fare plus a typical haggled range.",
+    "sources": ["https://newsmeter.in/top-stories/telangana-auto-fares-rise-minimum-fare-fixed-at-30-check-new-rates-776679"],
+    "baseFare": 30, "baseKm": 1.6, "perKm": 14, "nightMultiplier": 1.5, "nightHours": [23, 5],
+    "quotedAboveMeter": [1.0, 1.4]
+  },
+  "cab": {
+    "effectiveFrom": "2026-01-01",
+    "approximate": true,
+    "note": "Estimate for an economy app cab (Uber Go / Ola Mini class). Uber and Ola do not publish Hyderabad rate cards or offer a public price API, so this is base + per km + per minute, with a typical surge range by time of day. The real price is whatever the app shows.",
+    "sources": [],
+    "baseFare": 50, "perKm": 13, "perMin": 1.5, "minFare": 90,
+    "surge": [
+      { "hours": [0, 6], "range": [1.1, 1.4] },
+      { "hours": [7, 7], "range": [1.0, 1.2] },
+      { "hours": [8, 10], "range": [1.2, 1.8] },
+      { "hours": [11, 16], "range": [1.0, 1.2] },
+      { "hours": [17, 20], "range": [1.3, 2.0] },
+      { "hours": [21, 23], "range": [1.0, 1.3] }
+    ]
+  },
+  "shareAuto": {
+    "approximate": true,
+    "note": "Shared autos run informally on fixed corridors and are not guaranteed. Typical fares are ₹10–₹30 by distance.",
+    "sources": [],
+    "slabs": [ { "maxKm": 3, "fare": 10 }, { "maxKm": 6, "fare": 20 }, { "maxKm": null, "fare": 30 } ]
+  }
+}

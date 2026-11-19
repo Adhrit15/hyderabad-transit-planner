@@ -1,0 +1,14 @@
+{
+  "effectiveFrom": "2025-10-06",
+  "approximate": true,
+  "basis": "distance",
+  "currency": "INR",
+  "note": "City Ordinary / Metro Express. The 6 Oct 2025 revision added ₹5 to the first three stages and ₹10 from the fourth stage, with a ₹15 minimum. TGSRTC has not published the full stage table, so these distance slabs are an estimate. Each bus ride is a separate ticket.",
+  "sources": [
+    "https://munsifdaily.com/tgsrtc-increases-city-bus-fares-by-50-starting-from-today-october-6-2025-in-hyderabad/"
+  ],
+  "slabs": [
+    { "maxKm": 6, "fare": 15 }, { "maxKm": 10, "fare": 25 }, { "maxKm": 14, "fare": 30 }, { "maxKm": 18, "fare": 35 },
+    { "maxKm": 22, "fare": 40 }, { "maxKm": 28, "fare": 45 }, { "maxKm": 35, "fare": 50 }, { "maxKm": null, "fare": 60 }
+  ]
+}

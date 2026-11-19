@@ -1,0 +1,14 @@
+{
+  "$comment": "Explicit, reviewed corrections applied on top of source data. Each patch is logged in status.json. A patch whose 'when' condition no longer matches (e.g. the source fixed it upstream) is skipped automatically and reported as obsolete.",
+  "patches": [
+    {
+      "id": "hmrl-wk-calendar",
+      "source": "hmrl-gtfs",
+      "type": "calendar-days",
+      "serviceId": "WK",
+      "when": { "days": [1, 1, 1, 1, 1, 1, 1] },
+      "set": { "days": [1, 1, 1, 1, 1, 0, 0] },
+      "reason": "Service WK is marked as running all 7 days, but separate SA (973 trips) and SU (742 trips) services exist, so Saturday would get WK plus SA trains. WK is the Monday-to-Friday timetable."
+    }
+  ]
+}

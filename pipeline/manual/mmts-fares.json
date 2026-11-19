@@ -1,0 +1,11 @@
+{
+  "effectiveFrom": "2023-01-01",
+  "approximate": true,
+  "basis": "distance",
+  "currency": "INR",
+  "note": "Second class. South Central Railway quotes a ₹5 minimum and ₹15 maximum; the intermediate distance boundaries are estimated.",
+  "sources": [
+    "https://news.railanalysis.com/insights-on-multi-modal-transport-service-mmts-of-south-central-railway/"
+  ],
+  "slabs": [ { "maxKm": 10, "fare": 5 }, { "maxKm": 25, "fare": 10 }, { "maxKm": null, "fare": 15 } ]
+}

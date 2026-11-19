@@ -1,0 +1,11 @@
+{
+  "effectiveFrom": "2026-01-01",
+  "approximate": true,
+  "note": "Typical Hyderabad road speeds by hour of day (km/h), from general knowledge of city traffic patterns. They are not measured. Used for auto/cab travel times and to re-time bus trips whose published times are implausible. Replace with measured values when a traffic source is added (see REPORT.md Exercise 12).",
+  "roadCircuity": 1.35,
+  "carKmph": [32, 34, 35, 35, 33, 30, 26, 22, 17, 16, 18, 21, 21, 21, 21, 20, 19, 16, 14, 14, 17, 21, 25, 29],
+  "busKmphFactor": 0.75,
+  "busDwellSec": 25,
+  "walkKmph": 4.5,
+  "walkCircuity": 1.3
+}
