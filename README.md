@@ -1,135 +1,108 @@
-# Hyderabad Metro Route Planner
+# Hyderabad Transit Planner
 
-A full-stack route planner for the Hyderabad Metro (Red, Blue and Green lines). It shows graph
-algorithms at work: Dijkstra, A*, 0-1 BFS, a fare-constrained cheapest-route search and
-multi-criteria Pareto search. All of them are written from scratch in Java, with no graph
-libraries, on top of my own indexed binary heap. They are served by a Spring Boot REST API and
-drawn on a React + Leaflet map. A **search visualiser** replays every algorithm step by step:
-nodes are settled, the frontier grows, and the search tree spreads across the city.
+Point A to point B anywhere in Hyderabad, using **TGSRTC city buses, the Metro, MMTS trains,
+autos and cabs** in one search. Options are ranked by arrival time, cost, number of changes and
+walking. The data rebuilds itself **every day** from official open timetables. A validation and
+repair pipeline catches broken source data before it reaches users, and when a newer or more
+trusted source appears, it overrides the old one automatically with the change logged. Routing
+runs entirely in your browser (RAPTOR, the algorithm family behind real journey planners), so
+the site is free to host and never goes to sleep.
+
+The repo also contains the **Metro algorithm lab** (phase 1): Dijkstra, A*, 0-1 BFS and Pareto
+search written from scratch in Java, with a step-by-step search visualiser.
 
 > **Live demo:** _add your GitHub Pages link here after the first deploy:_ `https://<your-username>.github.io/<repo>/`
 
-![screenshot placeholder: add docs/screenshot.png or a GIF of the visualiser here](docs/screenshot.png)
+![screenshot placeholder: add docs/screenshot.png](docs/screenshot.png)
 
-## Features
-- **5 routing modes:** fastest (Dijkstra), A* (haversine heuristic), fewest changes (0-1 BFS),
-  cheapest (fare slabs, ties broken by time) and Pareto (every non-dominated time/transfer trade-off).
-- **(station, line) graph model:** changing lines is an explicit, costed edge (5 min by default,
-  configurable).
-- **Search visualiser:** play, pause, step, scrub and change speed, with live counters for nodes
-  expanded and frontier size.
-- **Compare view:** every mode side by side, plus nodes expanded by Dijkstra vs A* for the same query.
-- **Real data:** 56 stations; HMRL fare chart effective 24 May 2025 (₹11–₹69). See [DATA_SOURCES.md](DATA_SOURCES.md).
-- **REST API:** validation, RFC 7807 problem+json errors, OpenAPI/Swagger UI.
-- **Two engines, one contract:** the frontend calls the Java API, or runs a TypeScript port of the
-  engine in the browser. That port lets the demo be hosted for free as a static site.
-- **Tested:** 189 JUnit tests (randomised checks against Floyd–Warshall and brute force) and 13 Vitest parity tests.
+## What it does
+- **Multimodal journeys:** walk → bus → metro → MMTS → auto, in any combination, with real departure times and up to 4 changes.
+- **First and last mile:** walking (≤1.2 km), or an auto to the nearest metro/MMTS station when you are far from one. Share-auto hints near known auto points.
+- **Door-to-door alternatives:** walking, metered auto (government tariff, with night surcharge) and an app-cab price range by time of day.
+- **Ranked results:** *Fastest*, *Cheapest*, *Fewest changes* and *Least walking*, plus every other non-dominated option.
+- **Honest data:** every estimated time or fare is labelled. The **Data sources** panel shows each feed's freshness, validity dates, repairs and overrides.
+- **Shareable links:** `#plan&f=lat,lon,name&t=…`. Places come from stop search, map clicks, your location or an address search.
+
+## What the data pipeline found (and fixed) in the official feeds
+| Problem in source data | How the pipeline handles it |
+|---|---|
+| **93% of TGSRTC bus trips** have impossible stop times. Gaps between stops grow 1 → 77 min, and a city bus "arrives" at 34:38. | Keep each trip's stop sequence and first departure, then **re-time** it from distance, a time-of-day bus speed and stop dwell. These trips are flagged "times estimated". |
+| HMRL's weekday service is marked as running 7 days, beside separate Saturday/Sunday timetables. | A reviewed **patch** (`manual/patches.json`) makes it Mon–Fri. The patch reports itself obsolete once HMRL fixes the feed. |
+| HMRL's GTFS fare table is the 2017 chart (₹10–60). | The **override rule** (newest effective date wins) applies the May 2025 chart (₹11–69) and logs the decision. |
+| The MMTS timetable expired in April 2020. | Used as the last known schedule, with every MMTS leg flagged. Adding a newer MMTS feed replaces it automatically. |
+| A feed download fails or returns garbage. | The pipeline falls back to the **last-good snapshot**. With no usable data at all, the build fails and the live site keeps the previous version. |
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph Browser["Browser · React + Vite + Leaflet"]
-    UI[App.tsx<br/>pickers · modes · visualiser] --> API[api.ts]
-    API -->|VITE_API_URL unset| TS[TypeScript engine<br/>src/engine/*]
+  subgraph Sources
+    T[TGSRTC GTFS] & H[HMRL GTFS] & M[MMTS GTFS] & O[OpenStreetMap<br/>auto stands] & C[Curated JSON<br/>fares · traffic · patches]
   end
-  API -->|HTTP GET /api/*| C
-  subgraph Server["Spring Boot · Java 17"]
-    C[RouteController] --> S[RouteService]
-    S --> ST{{RouteStrategy}}
-    ST --> D[Dijkstra] & A[A*] & Z[0-1 BFS] & CH[Cheapest] & P[Pareto]
-    D & A --> H[BinaryMinHeap]
-    S --> G[(Graph<br/>station×line nodes)]
-    G --> J[(stations.json<br/>edges.json<br/>fares.json)]
+  subgraph Pipeline["pipeline/ (Node, daily GitHub Action)"]
+    F[fetch<br/>mirrors · retries · sha256] --> N[normalise] --> R[repair<br/>re-time trips] --> V[validate<br/>quality gate] --> S[select & override<br/>per mode · per attribute] --> B[bundle<br/>0.53 MB gzip]
+    F -. failure .-> LG[(last-good<br/>snapshot)]
   end
-  TS --> J
+  Sources --> F
+  B --> P[GitHub Pages]
+  subgraph Browser["Browser (React + Leaflet)"]
+    P --> NW[decode network] --> RP[RAPTOR<br/>+ footpaths] --> PL[plan: walk/auto access,<br/>fares, Pareto, tags] --> UI[journey cards + map]
+  end
+  subgraph Lab["Metro algorithm lab (phase 1)"]
+    J[Java engine · Spring Boot API] -.same JSON.- TSE[TS engine]
+  end
 ```
 
-## Run it
-
-**One command (Docker):**
+## Run it locally
 ```bash
-docker compose up --build
-```
-The web app is at http://localhost:5173, the API at http://localhost:8080/api/stations and
-Swagger at http://localhost:8080/swagger-ui.html.
-
-**Or with two terminals** (needs JDK 17+ and Node 20+):
-```bash
-cd backend && ./gradlew bootRun
+cd pipeline && npm install && npm run build
 ```
 ```bash
-cd frontend && npm install && VITE_API_URL=http://localhost:8080 npm run dev
+cd frontend && npm install && npm run dev
 ```
-If you leave out `VITE_API_URL`, the frontend uses the in-browser engine and needs no backend at all.
+The first command downloads the official feeds (~14 MB) and writes `frontend/public/data/`. Open http://localhost:5173.
+The Java API for the metro lab is optional: `cd backend && ./gradlew bootRun`, or `docker compose up --build`.
 
-**Tests and benchmark:**
+**Tests:**
 ```bash
-cd backend && ./gradlew test bench
+cd pipeline && npm test
 ```
 ```bash
 cd frontend && npm test
 ```
-
-## Deploy the public demo (free, GitHub Pages)
-1. Create an empty GitHub repo and push this project to it (`git remote add origin … && git push -u origin main`).
-2. In the repo, open **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. The `Deploy to GitHub Pages` workflow builds the frontend on every push to `main` and publishes it at
-   `https://<user>.github.io/<repo>/`. The workflow also fills in the "Source code" link in the app footer.
-
-## API examples
-```http
-GET /api/route?from=raidurg&to=mg-bus-station&mode=fastest
+```bash
+cd backend && ./gradlew test
 ```
-```json
-{ "mode": "fastest", "found": true, "totalMinutes": 38.1, "km": 18.6, "transfers": 1, "fare": 61,
-  "legs": [ { "lineName": "Blue Line", "towards": "Nagole", "minutes": 18.0, "stations": [ "…10 stations…" ] },
-            { "lineName": "Red Line",  "towards": "LB Nagar", "minutes": 15.1, "stations": [ "…10 stations…" ] } ],
-  "instructions": [ "Board the Blue Line at Raidurg towards Nagole.", "Ride 9 stops (18 min).",
-                    "Change at Ameerpet → Red Line towards LB Nagar (≈5 min walk + wait).", "Ride 9 stops (15.1 min).",
-                    "Alight at MG Bus Station." ],
-  "nodesExpanded": 37, "runtimeMicros": 1316 }
-```
-Other endpoints: `GET /api/stations`, `GET /api/compare?from=raidurg&to=lb-nagar`, and `&trace=true`
-on `/api/route` (returns the event list the visualiser replays). Errors look like
-`404 {"title":"Station not found","detail":"Unknown station: atlantis"}`. Full captured responses
-are in [docs/api-examples](docs/api-examples).
 
-## Algorithms at a glance
-| Mode | Algorithm | Cost minimised | Time complexity |
-|---|---|---|---|
-| `fastest` | Dijkstra + indexed binary heap (decrease-key) | minutes | O((V+E) log V) |
-| `astar` | A*, h = straight-line km ÷ 80 km/h (admissible, consistent) | minutes | O((V+E) log V), fewer expansions |
-| `fewest-transfers` | 0-1 BFS with a deque (transfer = 1, ride = 0), ties broken by minutes | (transfers, minutes) | O(V+E) for transfers alone |
-| `cheapest` | Dijkstra on km → minimum fare slab, then a km-capped label-setting search for the fastest route in that slab | (fare, minutes) | label-setting, small in practice |
-| `pareto` | Bi-criteria label-setting | all non-dominated (minutes, transfers) | O(T·(V+E) log(TV)), T = max transfers |
+## Deploy (free, self-updating)
+1. Push this repo to GitHub.
+2. Go to **Settings → Pages → Source: GitHub Actions**.
+3. The `Refresh data and deploy` workflow runs on every push and **daily at 06:00 IST**. It rebuilds
+   the data, runs all tests, deploys, and commits a line to [pipeline/state/CHANGELOG.md](pipeline/state/CHANGELOG.md) whenever the data changed.
 
-## Benchmark (`./gradlew bench`, JDK 25, Windows laptop)
-100 random queries on the metro graph (59 nodes, 118 edges):
+## Add or correct data
+- **New feed** (for example an updated MMTS timetable): add an entry to [pipeline/sources.json](pipeline/sources.json) with `covers: ["mmts"]`. If its calendar is active, it supersedes the expired one.
+- **New fare chart:** edit the matching `pipeline/manual/*-fares.json` with a new `effectiveFrom`.
+- **Fix a source error:** add a reviewed entry to `pipeline/manual/patches.json`.
+- **Share-auto stand:** add a row to `pipeline/manual/auto-points.csv`.
 
-| Strategy | avg nodes expanded | avg µs / query |
-|---|---:|---:|
-| Dijkstra (fastest) | 29.9 | 8.3 |
-| A* (haversine) | **23.9** (−20%) | 9.9 |
-| 0-1 BFS | 60.1 | 7.4 |
-| Cheapest | 59.5 | 28.2 |
-| Pareto | 35.3 | 20.8 |
-| Dijkstra, `PriorityQueue` + lazy deletion | 29.9 | 6.9 |
-
-Heap comparison on a 120×120 synthetic grid (28,800 nodes, 85,920 edges, 200 queries):
-`BinaryMinHeap` **3.37 ms** vs `PriorityQueue` + lazy deletion **4.01 ms** per query (16% faster).
-A* expands 21% fewer nodes there (11,214 vs 14,281), but it is slower in wall-clock time,
-because the trigonometry in each haversine call costs more than the nodes it saves.
-REPORT.md §7 discusses why.
+## Algorithms
+| Where | Algorithm | Notes |
+|---|---|---|
+| Trip planner | **RAPTOR** (round-based public transit routing) | Pareto over (arrival, rides) in O(K·(Σ pattern length + footpaths)); no priority queue; checked against time-dependent Dijkstra on 200 random timetables |
+| Trip planner | Multi-criteria filtering | Keeps journeys not dominated on (arrival, cost, changes, walking) |
+| Pipeline | FIFO pattern splitting | Splits trips that overtake each other into separate patterns, so RAPTOR can binary-search the earliest trip |
+| Metro lab | Dijkstra (own indexed binary heap), A*, 0-1 BFS, fare-constrained label-setting, Pareto | 189 JUnit tests, including randomised checks against Floyd–Warshall and brute force |
 
 ## Résumé bullet
-> Built a full-stack Hyderabad Metro route planner (Java 17, Spring Boot, React, Leaflet) with 5 from-scratch graph
-> algorithms (Dijkstra on a custom indexed binary heap, A*, 0-1 BFS, fare-constrained label-setting, Pareto
-> multi-criteria search) on a (station, line) graph. Added a step-by-step search visualiser; checked correctness with 189 JUnit
-> tests, including randomised differential testing against Floyd–Warshall and brute force; the custom heap is 16% faster than
-> `PriorityQueue` with lazy deletion. Shipped with CI, Docker and a static GitHub Pages deployment.
+> Built a self-updating multimodal journey planner for Hyderabad (bus, metro, MMTS, auto/cab) that serves 5,100+ stops and
+> 47,000+ daily trips from official GTFS feeds. Wrote a Node data pipeline that validates, repairs (re-timing 93% of bus trips
+> with impossible published times), merges sources by recency and trust with logged overrides, and redeploys daily with
+> last-good fallback. Implemented RAPTOR in TypeScript, running in the browser (~0.3 s per query, verified against time-dependent
+> Dijkstra), plus a Java/Spring Boot graph-algorithm engine (Dijkstra on a custom heap, A*, 0-1 BFS, Pareto) with 189 tests.
 
 ## Documents
-- [PLAN.md](PLAN.md): the original plan
-- [REPORT.md](REPORT.md): **the learning report** (algorithms worked by hand, design decisions, interview prep, exercises)
-- [DATA_SOURCES.md](DATA_SOURCES.md): what is verified and what is approximate
+- [REPORT.md](REPORT.md): the learning report (phase 1 metro algorithms, phase 2 data pipeline and RAPTOR)
+- [DATA_SOURCES.md](DATA_SOURCES.md): every source, what is verified or approximate, licences
+- [PLAN.md](PLAN.md): the plans for both phases
+- [docs/benchmark-output.txt](docs/benchmark-output.txt), [docs/api-examples](docs/api-examples): metro lab benchmark and API samples

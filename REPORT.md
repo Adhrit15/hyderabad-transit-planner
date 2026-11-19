@@ -502,3 +502,202 @@ To improve the data, replace the coordinates in `tools/generate-data.mjs` with s
 * **Trace:** the recorded list of algorithm events used by the visualiser.
 * **Vite:** a frontend dev server and bundler. **Vitest:** its test runner.
 * **0-1 BFS:** shortest paths with 0/1 weights using a deque.
+
+
+---
+---
+
+# PART 2: Hyderabad Transit Planner (multimodal, self-updating)
+
+## P2.1 Summary
+1. **Built:** a trip planner from any point A to any point B in Hyderabad, combining TGSRTC buses (5,028 stops, 1,031 routes), metro (57 stations),
+   MMTS (54 stations), walking, autos and cabs. Routing runs **in the browser** using RAPTOR over 47,862 trips.
+2. **Self-updating:** a Node pipeline (`pipeline/`) runs daily in GitHub Actions. It fetches the official GTFS feeds, then validates, repairs,
+   merges and bundles them (0.53 MB gzip), and redeploys GitHub Pages. A changelog of data changes is committed automatically.
+3. **Corrections as a first-class idea:** a source registry with trust levels, per-mode feed selection (an active feed beats an expired one),
+   attribute overrides (the newest effective date wins), and reviewed patches. Every decision is logged and shown in the UI.
+4. **Biggest finding:** the official TGSRTC feed's stop times are wrong for **41,590 of 44,892 trips (93%)**. They are re-timed and labelled "estimated".
+5. **Fails safe:** a broken download falls back to the last-good snapshot; with no usable data the build fails and the old site stays live. Both paths were tested by corrupting a feed.
+6. **Tests:** 14 pipeline tests (node:test) and 23 frontend tests (Vitest). The frontend tests include RAPTOR matching an independent time-dependent Dijkstra on 200 random
+   timetables, and exact parity between the pipeline's and the browser's re-timing functions. The 189 Java tests from part 1 are unchanged.
+7. **Verified live:** the pipeline was run against the real feeds online (fresh fetch of all 4 remote sources in 53 s). The UI was checked in the browser on desktop and phone.
+8. **Approximate:** bus times (mostly re-timed), bus and MMTS fare slabs, cab prices, and the traffic speed profile. Everything is labelled in the app and in DATA_SOURCES.md.
+9. **Not done:** live traffic, live bus positions (no public GTFS-Realtime for TGSRTC was found), a guaranteed share-auto network (it is informal), and timetables after midnight.
+10. **Read first:** P2.4 (the data findings), then P2.6 (RAPTOR by hand).
+
+## P2.2 Timeline
+| Commit | Step | Problems → fixes |
+|---|---|---|
+| (research) | Data search | OpenCity (the official host) sits behind a Cloudflare bot check; I did not try to bypass it. Found the same feeds on **Mobility Database**, which allows scripted downloads. OSM has only 9 auto stands mapped. Uber/Ola publish no rate cards or public price API. |
+| `63ef3d7` | Phase-2 plan | You chose a browser engine with GitHub Actions (free, never sleeps) over a hosted Java server. |
+| `97d1f73` | Registry, curated data, GTFS reader, fetcher | I first put "example" share-auto rows with made-up coordinates into the CSV, then removed them: invented data must not ship. |
+| `793fcd7` | Validate, repair, merge, bundle | **First bundle was 9 MB** (6 MB of per-trip timing profiles, because every re-timed trip got a unique profile). **Fix:** re-timed trips store no times; the browser recomputes them with the *same* function. The bundle went from 9 MB to 2.9 MB (0.53 MB gzip). That only works if both implementations agree to the second, so distances are stored as integer centi-km and a parity test compares them. |
+| `1d4dd19` | RAPTOR router + planner | **Bug found in review:** when a walk improved a stop already reached by a ride in the same round, I erased the ride's back-pointer, which breaks journey reconstruction. Fixed by keeping ride arrivals (`tauRide`) separate from overall arrivals (`tau`). **Design bug found by a test:** in the model an auto always beats a cab on both time and price, so the cab vanished from results. Cabs are now always shown (comfort, AC and luggage aren't modelled). Consecutive walk legs are merged. |
+| `a3e48f2` | Planner UI | **Bug found in the browser:** "Miyapur" was the *average* of the metro station and same-named bus stops 1.2 km apart. Places are now clustered by name **and** distance (400 m), anchored on the station. Metro legs said "Miyapur" instead of "Red Line". |
+| `eeecc7a` | Daily workflow | The changelog push is non-fatal, so a race with another push can't block a deploy. |
+| `16a0032` | DATA_SOURCES | none |
+
+## P2.3 Architecture walkthrough
+```mermaid
+sequenceDiagram
+  participant GH as GitHub Actions (06:00 IST)
+  participant SRC as Feeds (Mobility DB, Overpass)
+  participant PL as pipeline/src/run.mjs
+  participant PG as GitHub Pages
+  participant BR as Browser
+  GH->>PL: npm test, then node src/run.mjs
+  PL->>SRC: fetch (mirrors, 3 tries, backoff)
+  SRC-->>PL: zip bytes (sha256 recorded)
+  PL->>PL: normalise, repair, validate (reject means last-good)
+  PL->>PL: selectFeeds per mode, resolveAttr per attribute, patches
+  PL->>GH: network.json + status.json (exit 1 if a critical source has no data)
+  GH->>PG: build frontend, deploy, commit pipeline/state if data changed
+  BR->>PG: GET data/network.json (0.53 MB gzip)
+  BR->>BR: decode, build stop-to-pattern index and footpaths (grid)
+  BR->>BR: planJourneys = 2 RAPTOR runs + door-to-door, then Pareto and tags
+```
+**Files:**
+* `pipeline/sources.json`: the registry. `pipeline/manual/*`: curated fares, traffic, patches, auto points.
+* `pipeline/src/`: `fetch.mjs` (mirrors and snapshots), `gtfs.mjs` + `csv.mjs` (parsing), `normalise.mjs` (platforms → stations, km, weekday masks, patches),
+  `repair.mjs` (re-timing), `validate.mjs` (quality gate), `merge.mjs` (feed selection, overrides, FIFO patterns), `bundle.mjs` (delta encoding),
+  `status.mjs` (diff), `run.mjs` (orchestrator), `changelog.mjs`.
+* `frontend/src/planner/`: `network.ts` (decode, spatial grid, footpaths), `timing.ts` (trip times, mirrors repair.mjs), `raptor.ts`,
+  `fares.ts`, `plan.ts` (journey assembly and ranking), `places.ts` (search and geocoding), and the UI components `PlannerApp`, `PlaceInput`, `JourneyCard`, `PlannerMap`, `DataStatusPanel`.
+* `frontend/src/App.tsx`: two tabs. The metro lab (`MetroLab.tsx`) is lazy-loaded.
+
+## P2.4 What the real data looked like
+Measured on the feeds downloaded on 2026-11-19:
+
+| Check | Result |
+|---|---|
+| TGSRTC trips whose average speed (route km ÷ scheduled duration) is below 3 km/h | **31,469 of 44,892**. A bus at walking pace is not a timetable. |
+| Stop-times at or past 30:00 (6 am the next day) | **184,948** of 1.13 M |
+| Example (route 217C) | Consecutive gaps of 1, 4, 7, 11, 13 … 77 minutes; the trip "ends" at 34:38 |
+| Trips with plausible speed (10–25 km/h) | about 2,250 (5%) |
+| Distinct stop sequences / timing profiles | 4,304 / 7,414, so heavy compression is possible |
+| HMRL calendar | WK = all 7 days, but SA (973 trips) and SU (742 trips) also exist |
+| HMRL fares | 10 fare classes ₹10–₹60: the 2017 chart |
+| MMTS | calendar 2019-04-01 to 2020-04-01 |
+
+**Lesson:** "official" doesn't mean "correct". Treat every feed as a measurement that can be wrong. Check what's physically possible
+(speeds, times, coordinates), and keep the original next to your correction so the correction can be retired when the source improves.
+
+## P2.5 The data-merging model (how corrections win)
+1. **Per-mode feed selection** ([merge.mjs `selectFeeds`](pipeline/src/merge.mjs), line 9): candidates covering a mode are sorted by *calendar active*, then *newest valid-from*,
+   then *trust*. The winner is used and the others are logged as `feed-superseded`. That's why adding a 2027 MMTS feed would replace the 2019 one with no code change.
+2. **Attribute overrides** (`resolveAttr`, line 34): for something like `fare:metro`, the newest `effectiveFrom` wins, and ties go to higher trust. HMRL's own fare table
+   (trust 90, effective 2025-04-05) loses to the curated May 2025 chart (trust 80, effective 2025-05-24). Recency beats authority here, because fares change by notification.
+3. **Patches** (`normalise.mjs`): each patch has a `when` condition that describes the broken state. If the source no longer matches, the patch is skipped and reported *obsolete*,
+   so fixes never fight upstream fixes.
+4. **Repairs** (`repair.mjs`): rule-based, counted, and flagged per trip (`flags & 2`), so the UI can say "times estimated".
+5. **Quality gate** (`validate.mjs`): errors (no stops, < 50% valid trips, > 40% trip drop compared with the previous run) reject the feed, and the run falls back to last-good.
+
+## P2.6 RAPTOR from first principles
+**Why not Dijkstra?** In a timetable, an edge's cost depends on *when* you arrive at it (the next bus might leave in 2 or in 20 minutes). You can run a time-dependent Dijkstra,
+but RAPTOR exploits the structure of timetables: trips with the same stop sequence form a **pattern**, and inside a pattern trips never overtake each other (FIFO).
+
+**Rounds.** τₖ(s) is the earliest arrival at stop s using at most k vehicles. Round k:
+1. For every pattern serving a stop **marked** (improved) in round k−1, scan the pattern from that stop onwards.
+2. While scanning, keep the *current trip*. At each stop: if the current trip arrives earlier than anything known, record τₖ(s). Then, if we were at this stop in round k−1
+   in time for an *earlier* trip, switch to it (binary search, because trips are FIFO).
+3. Relax **footpaths** (walks of at most 500 m) from stops improved by a ride.
+4. The best arrival at the destination in round k is the best journey with k rides. Keep it only if it's faster than the journey with fewer rides. The result is a **Pareto set over (arrival, rides)**.
+
+**By hand.** Stops S0–S3. Pattern A: S0 → S1 → S2, trips leaving S0 at 1:00 and 2:00, 10 min per segment. Pattern B: S1 → S3, trips leaving S1 at 0:50, 1:15 and 2:30, 15 min ride.
+Query: from S0 at 0:58 to S3. (This is the first test in [planner.test.ts](frontend/src/planner/planner.test.ts).)
+
+| Round | Marked before | Scan | Result |
+|---|---|---|---|
+| 0 | none | access | τ₀(S0) = 0:58 |
+| 1 | {S0} | Pattern A from S0: earliest trip ≥ 0:58 is the 1:00 trip → S1 at 1:10, S2 at 1:20 | τ₁(S1) = 1:10, τ₁(S2) = 1:20. S3 not reached |
+| 2 | {S1, S2} | Pattern B from S1: earliest trip ≥ 1:10 is 1:15 (0:50 has left) → S3 at 1:30 | τ₂(S3) = **1:30**, a journey with 2 rides |
+| 3 | {S3} | no pattern improves anything | stop |
+
+Reconstruction follows the labels backwards: S3 ← ride B (board S1) ← ride A (board S0) ← access.
+
+**Code:** [raptor.ts](frontend/src/planner/raptor.ts): `raptor` (line 26), round loop (line 56), footpaths (line 88), `reconstruct` (line 114), `earliestTrip` (line 138).
+**Complexity:** O(K · (Σ pattern lengths + footpaths) · log T) for K rounds and T trips per pattern (the binary search). There is no heap.
+A long cross-city query scans about 29,000 patterns in about 0.3 s (two RAPTOR runs: walk-only and auto-access).
+**Correctness check:** `matches time-dependent Dijkstra on 200 random timetables`. Dijkstra over stops, where an edge's departure depends on arrival time, is exact on FIFO timetables.
+
+**FIFO splitting** ([merge.mjs `fifoChains`](pipeline/src/merge.mjs), line 45): if trip 2 leaves after trip 1 but arrives earlier somewhere, binary search on departure times breaks.
+The pipeline greedily puts each trip into the first chain it doesn't overtake, and each chain becomes its own pattern.
+
+## P2.7 The planner around RAPTOR ([plan.ts](frontend/src/planner/plan.ts), line 36)
+* **Access/egress:** stops within 1.2 km on foot (walk = straight line × 1.3 ÷ 4.5 km/h). If fewer than 3 are found, the 5 nearest within 3 km. A second RAPTOR run also allows an **auto** to
+  metro/MMTS stations within 7 km (3 min wait + road time for that hour, metered fare).
+* **Fares** (`priceTransit`, line 147): bus and MMTS are charged per ride; consecutive metro rides are charged once on their total km (one ticket inside the system).
+* **Door-to-door:** walk (≤ 3 km), auto (meter, plus the typical quoted range), cab (surge band by hour).
+* **Ranking** (`pareto`, line 202): drop journeys dominated on (arrival, max cost, changes, walking), then tag *Fastest / Cheapest / Fewest changes / Least walking*.
+* **Re-timed trips** are rebuilt on demand by `timing.ts` and cached per trip.
+
+## P2.8 Design decisions
+| # | Decision | Alternatives | Why |
+|---|---|---|---|
+| E1 | Browser routing + GitHub Actions (your choice) | Java server; both | Free, never sleeps, and refreshes daily. Trade-off: 0.53 MB download, and the logic lives in TypeScript, not Java. |
+| E2 | Re-time implausible bus trips instead of dropping them | Drop them (only 5% of bus trips would be left); trust them (28-hour city rides) | Keeps route coverage and stop sequences, which are the valuable part. The times are honestly labelled as estimates. |
+| E3 | Mobility Database mirror as the primary URL | OpenCity (official host, bot-protected) | Automatable; the registry supports more mirrors. |
+| E4 | Recency before trust for attributes | Trust only | Fares change by notification. An authoritative but stale table is still wrong. |
+| E5 | Expired MMTS feed used, but flagged | Drop MMTS | MMTS still runs, and the old timetable is a better guess than nothing. Users are warned. |
+| E6 | Store re-timed trips without times | Store all times | 3× smaller bundle. Requires bit-exact parity between two languages, which a test enforces. |
+| E7 | Footpaths computed in the browser | Precomputed in the pipeline | Saves about 400 KB; computing them takes about 50 ms. |
+| E8 | Nominatim address search only on an explicit action | Search as you type | Nominatim's usage policy forbids autocomplete-style use. |
+| E9 | Cab always shown | Pure Pareto | The model can't express comfort; hiding cabs would mislead. |
+| E10 | No chained footpaths; footpaths ≤ 500 m | Unlimited walking | Standard RAPTOR assumption; keeps rounds fast. Access walks can be longer (1.2 km). |
+| E11 | Times after midnight from the previous service day are ignored | Model overnight service | A rare case for Hyderabad city transit (metro runs about 6:00–23:00). Listed as a known limitation. |
+
+## P2.9 Tests
+| Suite | Count | Highlights |
+|---|---:|---|
+| `pipeline/test/pipeline.test.mjs` | 14 | CSV quoting; zip reading; platform → station; expired calendar = stale; patch applied/obsolete; validation drops backwards times and rejects a > 40% shrink; re-timing a "28-hour bus"; retime math (hour-dependent speed, 30 s minimum, no dwell at the end); FIFO splitting; override precedence; active feed beats expired; profile dedupe; delta round-trip; diff text |
+| `frontend/src/planner/planner.test.ts` | 10 | RAPTOR one-change journey and reconstruction; Pareto over rides; weekday mask; **matches time-dependent Dijkstra on 200 random timetables**; **TS and pipeline re-timing identical on 300 random trips**; fare maths; Pareto filter; 3 real-network queries |
+| `frontend/src/engine/engine.test.ts` | 13 | phase-1 metro parity (unchanged) |
+| Backend JUnit | 189 | phase 1 (unchanged; not re-run, since no backend code changed) |
+
+**Manual checks done:** a live online pipeline run; a corrupted-feed fallback; a no-data → FATAL run; the planner in the browser at desktop and phone width; the data-sources panel.
+
+**Not tested:** the GitHub Actions workflows themselves (they need the repo on GitHub); Nominatim address search (not exercised, to avoid sending test traffic to a volunteer-run service); geolocation.
+
+## P2.10 Known limitations (be upfront about these in interviews)
+* Bus times are mostly **estimates** because the source is broken. The planner still knows *which* buses go *where* and roughly when they start.
+* No live data: no GTFS-Realtime for TGSRTC was found, and traffic is a static hourly profile.
+* Share autos are informal; the app gives hints, not routes.
+* Cab prices are estimates; there's no Uber/Ola price API for new apps.
+* Journeys don't cross midnight; at most 4 changes; walking legs use straight-line × 1.3 instead of real streets.
+
+## P2.11 More exercises
+9. **★★ Trust dashboard.** Plot `pipeline/state/CHANGELOG.md` over time: trips per feed, re-timed share, overrides. *Files:* new `frontend/src/planner/History.tsx`, plus a JSON history written by `changelog.mjs`.
+10. **★★ Street-network walking.** Replace "straight line × 1.3" with OSM footpath distances, precomputed for stop pairs in the pipeline. *Files:* `pipeline/src/osm.mjs`, `network.ts`.
+11. **★★★ Range RAPTOR (rRAPTOR).** "Leave between 9:00 and 9:30": run RAPTOR for each departure in reverse order, reusing labels. Show the best departure time.
+12. **★★★ Live traffic adapter.** Add a `traffic-live` source (TomTom or HERE flow API, key in a GitHub secret) that samples about 20 corridors hourly and rewrites `carKmph`. Merge it with the static profile using `resolveAttr`. *Never put the key in the browser bundle.*
+13. **★★★ Crowd corrections.** Let users report "bus 218 left at 9:12". Store reports (for example as GitHub issues via a form), and add a pipeline step that turns repeated reports into patches.
+14. **★★★ GTFS-Realtime.** If TGSRTC publishes vehicle positions, add a `gtfs-rt` source and adjust departures in the browser. Think about CORS and update frequency.
+
+## P2.12 Interview questions (part 2)
+16. **How does RAPTOR differ from Dijkstra?** It works in rounds by number of vehicles, scans whole trip patterns, and needs no heap. It naturally returns the Pareto set over (arrival, transfers). Dijkstra needs time-dependent edges and finds only the earliest arrival.
+17. **Why must trips in a pattern be FIFO?** So the earliest catchable trip can be found by binary search, and so a later trip never beats an earlier one downstream. The pipeline splits patterns to guarantee it.
+18. **The official feed was wrong. What did you do?** I measured it (93% of trips outside a believable speed range), kept what was trustworthy (stop sequences and first departures), re-timed the rest with a documented model, labelled the results, and made the repair self-reporting.
+19. **How does your system decide which source wins?** Per mode: active, then newest, then trust. Per attribute: newest effective date, then trust. Patches carry a "when broken" condition. Every decision is logged and shown to users.
+20. **How do you make sure a bad update never reaches users?** A validation gate plus last-good snapshots. If nothing valid exists, the build fails and Pages keeps the previous deployment. I tested both paths by corrupting a feed.
+21. **Why run the router in the browser?** No server cost or cold starts, user locations never leave the device, and the network is only 0.53 MB gzip. Downside: logic is duplicated with the pipeline, so I share code or test parity.
+22. **What would you do with more time?** Real-time feeds, street-network walking, rRAPTOR for departure windows, and crowd-sourced corrections feeding patches.
+
+**Updated 60-second pitch, part 2:** "Then I turned it into a real planner for all of Hyderabad: buses, metro, MMTS, autos and cabs. The interesting
+part was the data. The official bus timetable claims a city bus takes 28 hours. I built a pipeline that validates every feed, repairs what's
+physically impossible, lets newer sources override older ones with every decision logged, and falls back to the last good data if a download breaks.
+It runs every morning on GitHub Actions and redeploys the site. Routing is RAPTOR, running in the browser over 47,000 daily trips in about a third of a second,
+and I verified it against a brute-force Dijkstra on hundreds of random timetables."
+
+## P2.13 Glossary additions
+* **GTFS:** General Transit Feed Specification, the standard zip of CSV files describing stops, routes, trips and stop times. **GTFS-Realtime:** its live extension.
+* **Pattern (RAPTOR route):** a set of trips with the same stop sequence that don't overtake each other.
+* **FIFO (in timetables):** first in, first out; a trip that departs later never arrives earlier.
+* **Round (RAPTOR):** one iteration that allows one more vehicle.
+* **Footpath:** a walking transfer between nearby stops.
+* **Access/egress:** getting from your origin to the first stop, and from the last stop to your destination.
+* **Snapshot / last-good:** the stored copy of a source; last-good is the latest copy that passed validation.
+* **Trust / effectiveFrom:** the registry fields that decide which source wins a conflict.
+* **Patch:** a reviewed correction with a condition describing the broken state it fixes.
+* **Re-timing:** rebuilding a trip's stop times from distance and speed when the published times are impossible.
+* **Overpass / Nominatim:** OpenStreetMap's query API and geocoder.
+* **Delta encoding:** storing each number as the difference from the previous one, which makes JSON smaller.
