@@ -36,7 +36,7 @@ export async function fetchSource(source, cacheDir, { offline = false, retries =
           const sha = sha256(bytes);
           const fetchedAt = new Date().toISOString();
           writeFileSync(join(dir, 'latest.bin'), bytes);
-          writeFileSync(join(dir, 'latest.json'), JSON.stringify({ sha, url, fetchedAt, bytes: bytes.length }, null, 2));
+          writeFileSync(join(dir, 'latest.json'), JSON.stringify({ sha, url, fetchedAt, size: bytes.length }, null, 2));
           return { bytes, sha, url, fetchedAt, fromSnapshot: false, errors };
         } catch (e) {
           errors.push(`${url} (attempt ${attempt + 1}): ${e.message}`);
@@ -52,7 +52,8 @@ export function loadSnapshot(id, cacheDir, errors = []) {
   const dir = join(cacheDir, 'snapshots', id);
   if (!existsSync(join(dir, 'latest.bin'))) return null;
   const meta = JSON.parse(readFileSync(join(dir, 'latest.json'), 'utf8'));
-  return { bytes: new Uint8Array(readFileSync(join(dir, 'latest.bin'))), ...meta, fromSnapshot: true, errors };
+  // Metadata first, so nothing in it can shadow the file contents.
+  return { ...meta, bytes: new Uint8Array(readFileSync(join(dir, 'latest.bin'))), fromSnapshot: true, errors };
 }
 
 /** Marks the snapshot that passed validation as last-good (separate from "latest", which may be broken). */
@@ -66,5 +67,5 @@ export function loadLastGood(id, cacheDir) {
   const dir = join(cacheDir, 'snapshots', id);
   if (!existsSync(join(dir, 'last-good.bin'))) return null;
   const meta = JSON.parse(readFileSync(join(dir, 'last-good.json'), 'utf8'));
-  return { bytes: new Uint8Array(readFileSync(join(dir, 'last-good.bin'))), ...meta, fromSnapshot: true, lastGood: true, errors: [] };
+  return { ...meta, bytes: new Uint8Array(readFileSync(join(dir, 'last-good.bin'))), fromSnapshot: true, lastGood: true, errors: [] };
 }

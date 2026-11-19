@@ -146,3 +146,33 @@ test('diffStatus reports new versions, count changes and new overrides', () => {
   assert.ok(d.some((x) => x.includes('trips 10 → 12 (+2)')));
   assert.ok(d.some((x) => x.includes('x now overrides y')));
 });
+
+test('cached snapshots load their real bytes, and fetch falls back to them when offline', async () => {
+  const { mkdtempSync, writeFileSync, mkdirSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { fetchSource, loadSnapshot } = await import('../src/fetch.mjs');
+  const dir = mkdtempSync(join(tmpdir(), 'snap-'));
+  mkdirSync(join(dir, 'snapshots', 's'), { recursive: true });
+  writeFileSync(join(dir, 'snapshots', 's', 'latest.bin'), new Uint8Array([1, 2, 3]));
+  // Old metadata files stored the size under "bytes"; it must not shadow the contents.
+  writeFileSync(join(dir, 'snapshots', 's', 'latest.json'), JSON.stringify({ sha: 'x', bytes: 3 }));
+  const snap = loadSnapshot('s', dir);
+  assert.ok(snap.bytes instanceof Uint8Array);
+  assert.deepEqual([...snap.bytes], [1, 2, 3]);
+  const off = await fetchSource({ id: 's', urls: ['http://invalid.invalid/'] }, dir, { offline: true });
+  assert.equal(off.fromSnapshot, true);
+  assert.deepEqual([...off.bytes], [1, 2, 3]);
+});
+
+test('extractPlaces keeps named places, classifies them and merges near-duplicates', async () => {
+  const { extractPlaces } = await import('../src/places.mjs');
+  const rows = extractPlaces({ elements: [
+    { type: 'way', center: { lat: 17.4344, lon: 78.3866 }, tags: { name: 'Inorbit Mall Cyberabad', shop: 'mall' } },
+    { type: 'node', lat: 17.4345, lon: 78.3867, tags: { name: 'Inorbit Mall Cyberabad', shop: 'mall' } },   // duplicate, 15 m away
+    { type: 'node', lat: 17.44, lon: 78.35, tags: { name: 'Gachibowli', place: 'suburb' } },
+    { type: 'node', lat: 17.41, lon: 78.44, tags: { name: 'NIMS', amenity: 'hospital' } },
+    { type: 'node', lat: 17.41, lon: 78.44, tags: { amenity: 'hospital' } },                                // no name
+  ] });
+  assert.deepEqual(rows.map((r) => [r[0], r[3]]), [['Gachibowli', 'area'], ['Inorbit Mall Cyberabad', 'shopping'], ['NIMS', 'hospital']]);
+});
