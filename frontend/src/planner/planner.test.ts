@@ -152,7 +152,8 @@ describe('fares', () => {
 // Real-data smoke test: runs only after `npm run data` has produced the bundle.
 const bundle = new URL('../../public/data/network.json', import.meta.url);
 describe.runIf(existsSync(bundle))('real Hyderabad network', () => {
-  const net = decodeNetwork(JSON.parse(readFileSync(bundle, 'utf8')));
+  // describe.runIf still runs this body when skipped, so only read the file if it exists.
+  const net = existsSync(bundle) ? decodeNetwork(JSON.parse(readFileSync(bundle, 'utf8'))) : (null as unknown as Network);
   const P = (lat: number, lon: number, name: string) => ({ lat, lon, name });
   it.each([
     ['Miyapur → Charminar', P(17.4968, 78.3727, 'Miyapur'), P(17.3616, 78.4747, 'Charminar')],
@@ -203,8 +204,9 @@ describe('place search', () => {
 
 const placesFile = new URL('../../public/data/places.json', import.meta.url);
 describe.runIf(existsSync(bundle) && existsSync(placesFile))('real place index', () => {
-  const net = decodeNetwork(JSON.parse(readFileSync(bundle, 'utf8')));
-  const index = buildPlaceIndex(net, JSON.parse(readFileSync(placesFile, 'utf8')));
+  const ready = existsSync(bundle) && existsSync(placesFile);
+  const net = ready ? decodeNetwork(JSON.parse(readFileSync(bundle, 'utf8'))) : (null as unknown as Network);
+  const index = ready ? buildPlaceIndex(net, JSON.parse(readFileSync(placesFile, 'utf8'))) : [];
   it.each(['Inorbit Mall', 'Gachibowli', 'NIMS', 'Shilparamam', 'Hussain Sagar', 'Begumpet Airport', 'Kondapur', 'Mindspace'])(
     'finds "%s" without any network call', (q) => {
       const r = searchPlaces(index, q);

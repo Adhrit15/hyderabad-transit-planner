@@ -7,7 +7,7 @@
   "scripts": {
     "build": "node src/run.mjs --out ../frontend/public/data",
     "build:offline": "node src/run.mjs --out ../frontend/public/data --offline",
-    "test": "node --test test/"
+    "test": "node --test \"test/**/*.test.mjs\""
   },
   "engines": {
     "node": ">=20"
