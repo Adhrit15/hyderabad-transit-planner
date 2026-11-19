@@ -12,7 +12,7 @@ import { useTracePlayer } from './components/useTracePlayer';
 const REPO_URL = import.meta.env.VITE_REPO_URL as string | undefined;
 
 function readUrl() {
-  const p = new URLSearchParams(window.location.hash.replace(/^#\??/, ''));
+  const p = new URLSearchParams(window.location.hash.replace(/^#(lab)?[&?]?/, ''));
   return {
     from: p.get('from') ?? 'raidurg',
     to: p.get('to') ?? 'mg-bus-station',
@@ -20,7 +20,7 @@ function readUrl() {
   };
 }
 
-export default function App() {
+export default function MetroLab() {
   const initial = readUrl();
   const [meta, setMeta] = useState<StationsResponse | null>(null);
   const [from, setFrom] = useState(initial.from);
@@ -42,7 +42,7 @@ export default function App() {
     try {
       const [r, c] = await Promise.all([api.route(f, t, m, true), api.compare(f, t)]);
       setRoute(r); setCompare(c); setAlt(0);
-      window.history.replaceState(null, '', `#from=${f}&to=${t}&mode=${m}`);
+      window.history.replaceState(null, '', `#lab&from=${f}&to=${t}&mode=${m}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
