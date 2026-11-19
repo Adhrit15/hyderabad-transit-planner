@@ -11,7 +11,7 @@ the site is free to host and never goes to sleep.
 The repo also contains the **Metro algorithm lab** (phase 1): Dijkstra, A*, 0-1 BFS and Pareto
 search written from scratch in Java, with a step-by-step search visualiser.
 
-> **Live demo:** _add your GitHub Pages link here after the first deploy:_ `https://<your-username>.github.io/<repo>/`
+> **Live:** https://adhrit15.github.io/hyderabad-transit-planner/ (rebuilt every day at 06:00 IST)
 
 ![screenshot placeholder: add docs/screenshot.png](docs/screenshot.png)
 

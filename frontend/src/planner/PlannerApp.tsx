@@ -129,6 +129,7 @@ export default function PlannerApp() {
 
         <footer className="foot">
           {status && <button className="link-btn" onClick={() => setShowStatus(true)}>Data sources and freshness →</button>}
+          {import.meta.env.VITE_REPO_URL && <a href={import.meta.env.VITE_REPO_URL} target="_blank" rel="noreferrer">Source code and learning report ↗</a>}
           <span>Bus times are mostly estimated: 93% of trips in the official feed have impossible stop times, so they are rebuilt from distance and typical traffic.</span>
           <span>{net?.attribution.join(' · ')} · Map © OpenStreetMap contributors</span>
           <span>Routes are computed in your browser and your location never leaves it. Text you type in the search boxes is sent to OpenStreetMap search services (Photon, Nominatim) to suggest places.</span>
