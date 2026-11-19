@@ -169,3 +169,52 @@ describe.runIf(existsSync(bundle))('real Hyderabad network', () => {
     expect(r.stats.ms).toBeLessThan(3000);
   });
 });
+
+import { buildPlaceIndex, mergeResults, searchPlaces, type Place } from './places';
+
+describe('place search', () => {
+  const idx: Place[] = [
+    { name: 'Inorbit Mall Cyberabad', lat: 17.4344, lon: 78.3866, kind: 'landmark' },
+    { name: 'Inorbit Mall Road', lat: 17.433, lon: 78.388, kind: 'bus' },
+    { name: 'Gachibowli', lat: 17.44, lon: 78.35, kind: 'area' },
+    { name: 'Gachibowli Stadium', lat: 17.447, lon: 78.349, kind: 'landmark' },
+    { name: 'Ameerpet', lat: 17.4357, lon: 78.4448, kind: 'metro' },
+  ];
+  it('matches every word, in any order, ranking name-start matches first', () => {
+    // the mall itself ranks above the bus stop named after its road
+    expect(searchPlaces(idx, 'mall inorbit').map((p) => p.name)).toEqual(['Inorbit Mall Cyberabad', 'Inorbit Mall Road']);
+    expect(searchPlaces(idx, 'gachi')[0].name).toBe('Gachibowli');
+    expect(searchPlaces(idx, 'stadium')[0].name).toBe('Gachibowli Stadium');
+    expect(searchPlaces(idx, 'xyz')).toEqual([]);
+  });
+  it('ignores punctuation and case', () => {
+    expect(searchPlaces(idx, 'AMEER-PET'.replace('-', ''))[0].kind).toBe('metro');
+  });
+  it('drops live results that duplicate a local place', () => {
+    const live: Place[] = [
+      { name: 'Inorbit Mall Cyberabad', lat: 17.4345, lon: 78.3867, kind: 'address' },
+      { name: 'IKEA', lat: 17.437, lon: 78.38, kind: 'address' },
+      { name: 'Inorbit Mall Road', lat: 17.433, lon: 78.3875, kind: 'address' },
+      { name: 'Inorbit Mall Road', lat: 17.4335, lon: 78.3885, kind: 'address' },   // another segment of the same road
+    ];
+    expect(mergeResults(idx.slice(0, 1), live).map((p) => p.name)).toEqual(['Inorbit Mall Cyberabad', 'IKEA', 'Inorbit Mall Road']);
+  });
+});
+
+const placesFile = new URL('../../public/data/places.json', import.meta.url);
+describe.runIf(existsSync(bundle) && existsSync(placesFile))('real place index', () => {
+  const net = decodeNetwork(JSON.parse(readFileSync(bundle, 'utf8')));
+  const index = buildPlaceIndex(net, JSON.parse(readFileSync(placesFile, 'utf8')));
+  it.each(['Inorbit Mall', 'Gachibowli', 'NIMS', 'Shilparamam', 'Hussain Sagar', 'Begumpet Airport', 'Kondapur', 'Mindspace'])(
+    'finds "%s" without any network call', (q) => {
+      const r = searchPlaces(index, q);
+      expect(r.length, q).toBeGreaterThan(0);
+      expect(r[0].name.toLowerCase()).toContain(q.toLowerCase().split(' ')[0]);
+    });
+  it('a landmark that is not a stop can be used as a trip end', () => {
+    const inorbit = searchPlaces(index, 'inorbit mall cyberabad')[0];
+    const nims = searchPlaces(index, 'nims')[0];
+    const r = planJourneys(net, inorbit, nims, 10 * 3600, 1 << 1);
+    expect(r.journeys.some((j) => j.legs.some((l) => ['bus', 'metro', 'mmts'].includes(l.kind)))).toBe(true);
+  });
+});

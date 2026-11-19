@@ -246,3 +246,5 @@ tr:last-child td { border-bottom: 0; }
   .shell { height: auto; min-height: 100%; }
   .status-panel { position: fixed; top: 8px; bottom: 8px; right: 8px; left: 8px; width: auto; }
 }
+.picker-list li.group-start { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 22px; position: relative; }
+.picker-list li.group-start::before { content: attr(data-group); position: absolute; top: 4px; left: 10px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { loadNetwork, type DataStatus, type Network } from './network';
+import { loadNetwork, type DataStatus, type Landmark, type Network } from './network';
 import { istNow, planJourneys, type Journey } from './plan';
 import { buildPlaceIndex, type Place } from './places';
 import { PlaceInput } from './PlaceInput';
@@ -24,6 +24,7 @@ function readHash() {
 export default function PlannerApp() {
   const [net, setNet] = useState<Network | null>(null);
   const [status, setStatus] = useState<DataStatus | null>(null);
+  const [landmarks, setLandmarks] = useState<Landmark[]>([]);
   const [loadErr, setLoadErr] = useState<string | null>(null);
   const init = readHash();
   const [from, setFrom] = useState<Place | null>(init.from);
@@ -39,10 +40,10 @@ export default function PlannerApp() {
   const [showStatus, setShowStatus] = useState(false);
 
   useEffect(() => {
-    loadNetwork().then(({ net, status }) => { setNet(net); setStatus(status); })
+    loadNetwork().then(({ net, status, landmarks }) => { setNet(net); setStatus(status); setLandmarks(landmarks); })
       .catch((e) => setLoadErr(`Could not load the transit data (${e.message}). Run "npm run data" locally, or try again later.`));
   }, []);
-  const index = useMemo(() => (net ? buildPlaceIndex(net) : []), [net]);
+  const index = useMemo(() => (net ? buildPlaceIndex(net, landmarks) : []), [net, landmarks]);
 
   // Sensible demo trip on first visit, so the page opens in a working state.
   useEffect(() => {
@@ -130,7 +131,7 @@ export default function PlannerApp() {
           {status && <button className="link-btn" onClick={() => setShowStatus(true)}>Data sources and freshness →</button>}
           <span>Bus times are mostly estimated: 93% of trips in the official feed have impossible stop times, so they are rebuilt from distance and typical traffic.</span>
           <span>{net?.attribution.join(' · ')} · Map © OpenStreetMap contributors</span>
-          <span>Your location and searches stay in your browser. Only address searches are sent to OpenStreetMap Nominatim.</span>
+          <span>Routes are computed in your browser and your location never leaves it. Text you type in the search boxes is sent to OpenStreetMap search services (Photon, Nominatim) to suggest places.</span>
         </footer>
       </aside>
 

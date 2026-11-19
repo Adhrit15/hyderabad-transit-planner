@@ -93,12 +93,17 @@ export function stopsNear(net: Pick<Network, 'grid' | 'lat' | 'lon'>, lat: numbe
   return out.sort((a, b) => a.km - b.km);
 }
 
-export async function loadNetwork(base = './data/'): Promise<{ net: Network; status: DataStatus }> {
-  const [raw, status] = await Promise.all([
+/** [name, lat, lon, kind] from pipeline/src/places.mjs */
+export type Landmark = [string, number, number, string];
+
+export async function loadNetwork(base = './data/'): Promise<{ net: Network; status: DataStatus; landmarks: Landmark[] }> {
+  const [raw, status, landmarks] = await Promise.all([
     fetch(`${base}network.json`).then((r) => { if (!r.ok) throw new Error(`network.json: HTTP ${r.status}`); return r.json(); }),
     fetch(`${base}status.json`).then((r) => r.json()),
+    // Optional: older bundles have no places file, and search still works with stops only.
+    fetch(`${base}places.json`).then((r) => (r.ok ? r.json() : [])).catch(() => []),
   ]);
-  return { net: decodeNetwork(raw), status };
+  return { net: decodeNetwork(raw), status, landmarks };
 }
 
 export interface DataStatus {

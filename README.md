@@ -21,7 +21,8 @@ search written from scratch in Java, with a step-by-step search visualiser.
 - **Door-to-door alternatives:** walking, metered auto (government tariff, with night surcharge) and an app-cab price range by time of day.
 - **Ranked results:** *Fastest*, *Cheapest*, *Fewest changes* and *Least walking*, plus every other non-dominated option.
 - **Honest data:** every estimated time or fare is labelled. The **Data sources** panel shows each feed's freshness, validity dates, repairs and overrides.
-- **Shareable links:** `#plan&f=lat,lon,name&t=…`. Places come from stop search, map clicks, your location or an address search.
+- **Find any place:** 5,100+ stops and stations plus ~8,600 named places from OpenStreetMap (areas, malls, hospitals, colleges, IT parks, landmarks) work instantly, even offline. Live suggestions while you type (Photon) and a full address search (Nominatim) cover the rest, with no API key. You can also click the map or use your location.
+- **Shareable links:** `#plan&f=lat,lon,name&t=…`.
 
 ## What the data pipeline found (and fixed) in the official feeds
 | Problem in source data | How the pipeline handles it |
