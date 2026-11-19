@@ -1,20 +1,30 @@
-# Publishes the frontend (with the in-browser TypeScript engine) to GitHub Pages.
+# Builds the transit data and the site, and publishes them to GitHub Pages.
+# Runs on every push to main AND once a day, so timetables, fares and corrections stay current.
+#
+# Safety net: if a critical source is down or fails validation, the pipeline falls back to the
+# last-good snapshot (kept in the Actions cache). If there is no usable data at all, the job fails
+# and GitHub Pages keeps serving the previous version, so a broken feed never reaches users.
+# GitHub emails the repo owner when a scheduled run fails.
+#
 # One-time setup: repo Settings → Pages → Source: "GitHub Actions".
-name: Deploy to GitHub Pages
+name: Refresh data and deploy
 
 on:
   push:
     branches: [main]
+    paths-ignore: ['pipeline/state/**']
+  schedule:
+    - cron: '30 0 * * *'        # 06:00 IST every day
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write                # to commit pipeline/state (data changelog)
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -25,13 +35,45 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci
-        working-directory: frontend
-      - run: npm test && npm run build
+          cache-dependency-path: |
+            frontend/package-lock.json
+            pipeline/package-lock.json
+
+      - name: Restore source snapshots (last-good fallback)
+        uses: actions/cache@v4
+        with:
+          path: pipeline/.cache/snapshots
+          key: snapshots-${{ github.run_id }}
+          restore-keys: snapshots-
+
+      - name: Build transit data
+        working-directory: pipeline
+        run: |
+          npm ci
+          npm test
+          node --max-old-space-size=6144 src/run.mjs --out ../frontend/public/data
+
+      - name: Build site
         working-directory: frontend
         env:
           VITE_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Record data changes
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if ! git diff --quiet -- pipeline/state; then
+            node pipeline/src/changelog.mjs frontend/public/data/status.json
+            git config user.name "transit-data-bot"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add pipeline/state
+            git commit -m "data: daily refresh $(date -u +%F)"
+            git push || echo "::warning::could not push the data changelog; it will be recorded on the next run"
+          fi
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
