@@ -1,0 +1,199 @@
+{
+  "sources": [
+    {
+      "id": "tgsrtc-gtfs",
+      "name": "TGSRTC city bus timetable (Open Data Telangana)",
+      "kind": "gtfs",
+      "attribution": "Contains data from TGSRTC via Open Data Telangana",
+      "homepage": "https://mobilitydatabase.org/feeds/gtfs/mdb-3361",
+      "licence": "Open Data Telangana (public domain per OpenCity listing)",
+      "state": "cached",
+      "sha": "e0a90bca1b9490a5cf92a805fecba7aca2c011527b2269904d54c5cc553be4d6",
+      "url": "https://files.mobilitydatabase.org/mdb-3361/latest.zip",
+      "validFrom": "20260201",
+      "validTo": "20310201",
+      "active": true,
+      "version": "20260201",
+      "counts": {
+        "stops": 5028,
+        "routes": 1031,
+        "trips": 44892
+      },
+      "repairs": {
+        "retimed": 41590,
+        "tooSlow": 37785,
+        "tooFast": 114,
+        "beyond48h": 3691,
+        "of": 44892
+      },
+      "dropped": {
+        "stopsOutsideRegion": 0,
+        "nonMonotonicTrips": 0,
+        "tripsOnDroppedStops": 0
+      },
+      "warnings": [
+        "41590 of 44892 trips had implausible published times and were re-timed from their first departure (flagged \"times estimated\")"
+      ],
+      "patches": {
+        "applied": [],
+        "obsolete": []
+      }
+    },
+    {
+      "id": "hmrl-gtfs",
+      "name": "Hyderabad Metro Rail timetable and stations (HMRL)",
+      "kind": "gtfs",
+      "attribution": "Contains data provided by Hyderabad Metro Rail Ltd.",
+      "homepage": "https://hmrl.co.in/open-data.html",
+      "licence": "HMRL open data (redistribution with attribution)",
+      "state": "cached",
+      "sha": "ed801427b35ac0760092d13eccf65d71cd299910c2ab80e1de54cf21f33727f1",
+      "url": "https://files.mobilitydatabase.org/mdb-2457/latest.zip",
+      "validFrom": "20250405",
+      "validTo": "20300101",
+      "active": true,
+      "version": null,
+      "counts": {
+        "stops": 57,
+        "routes": 3,
+        "trips": 2828
+      },
+      "repairs": {
+        "retimed": 0
+      },
+      "dropped": {
+        "stopsOutsideRegion": 0,
+        "nonMonotonicTrips": 0,
+        "tripsOnDroppedStops": 0
+      },
+      "warnings": [],
+      "patches": {
+        "applied": [
+          "hmrl-wk-calendar"
+        ],
+        "obsolete": []
+      }
+    },
+    {
+      "id": "mmts-gtfs",
+      "name": "MMTS suburban rail timetable (Open Data Telangana, 2019)",
+      "kind": "gtfs",
+      "attribution": "Contains data from Open Data Telangana",
+      "homepage": "https://www.transit.land/feeds/f-mmts~hyderabad",
+      "licence": "CDLA-Permissive-1.0",
+      "state": "cached",
+      "sha": "fa71417fdb8e16a1740e99fcc7a2455ebadd3d8b3d77243a8e7ed5a75f6ba3df",
+      "url": "https://files.mobilitydatabase.org/mdb-921/latest.zip",
+      "validFrom": "20190401",
+      "validTo": "20200401",
+      "active": false,
+      "version": null,
+      "counts": {
+        "stops": 54,
+        "routes": 142,
+        "trips": 142
+      },
+      "repairs": {
+        "retimed": 0
+      },
+      "dropped": {
+        "stopsOutsideRegion": 0,
+        "nonMonotonicTrips": 0,
+        "tripsOnDroppedStops": 0
+      },
+      "warnings": [
+        "timetable expired on 20200401; using it as the last known schedule (marked stale)"
+      ],
+      "patches": {
+        "applied": [],
+        "obsolete": []
+      }
+    },
+    {
+      "id": "metro-fares-2025",
+      "name": "manual/metro-fares-2025.json",
+      "kind": "manual",
+      "state": "manual",
+      "effectiveFrom": "2025-05-24",
+      "approximate": false,
+      "note": "HMRL fare chart after the 10% discount, effective 24 May 2025. Fare is by the distance travelled on the metro; one ticket covers interchanges.",
+      "links": [
+        "https://telanganatoday.com/hyderabad-metro-rail-announces-revised-fare-chart-with-10-per-cent-discount",
+        "https://www.thenewsminute.com/telangana/hyderabad-metro-announces-10-discount-on-increased-fares"
+      ]
+    },
+    {
+      "id": "bus-fares",
+      "name": "manual/bus-fares.json",
+      "kind": "manual",
+      "state": "manual",
+      "effectiveFrom": "2025-10-06",
+      "approximate": true,
+      "note": "City Ordinary / Metro Express. The 6 Oct 2025 revision added ₹5 to the first three stages and ₹10 from the fourth stage, with a ₹15 minimum. TGSRTC has not published the full stage table, so these distance slabs are an estimate. Each bus ride is a separate ticket.",
+      "links": [
+        "https://munsifdaily.com/tgsrtc-increases-city-bus-fares-by-50-starting-from-today-october-6-2025-in-hyderabad/"
+      ]
+    },
+    {
+      "id": "mmts-fares",
+      "name": "manual/mmts-fares.json",
+      "kind": "manual",
+      "state": "manual",
+      "effectiveFrom": "2023-01-01",
+      "approximate": true,
+      "note": "Second class. South Central Railway quotes a ₹5 minimum and ₹15 maximum; the intermediate distance boundaries are estimated.",
+      "links": [
+        "https://news.railanalysis.com/insights-on-multi-modal-transport-service-mmts-of-south-central-railway/"
+      ]
+    },
+    {
+      "id": "road-fares",
+      "name": "manual/road-fares.json",
+      "kind": "manual",
+      "state": "manual",
+      "effectiveFrom": null,
+      "approximate": true,
+      "note": null,
+      "links": []
+    },
+    {
+      "id": "traffic-profile",
+      "name": "manual/traffic-profile.json",
+      "kind": "manual",
+      "state": "manual",
+      "effectiveFrom": "2026-01-01",
+      "approximate": true,
+      "note": "Typical Hyderabad road speeds by hour of day (km/h), from general knowledge of city traffic patterns. They are not measured. Used for auto/cab travel times and to re-time bus trips whose published times are implausible. Replace with measured values when a traffic source is added (see REPORT.md Exercise 12).",
+      "links": []
+    },
+    {
+      "id": "osm-auto-stands",
+      "name": "Auto / taxi stands mapped in OpenStreetMap",
+      "kind": "overpass",
+      "attribution": "© OpenStreetMap contributors",
+      "state": "failed",
+      "counts": {
+        "points": 0
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "kind": "attribute-override",
+      "attribute": "fare:metro",
+      "winner": "metro-fares-2025",
+      "loser": "hmrl-gtfs-fares",
+      "reason": "HMRL fare chart May 2025 (curated) (effective 2025-05-24) is newer than HMRL GTFS fare table (₹10–₹60, 3481 station pairs) (effective 2025-04-05)"
+    }
+  ],
+  "network": {
+    "stops": 5139,
+    "routes": 1176,
+    "patterns": 6289,
+    "trips": 47862,
+    "profiles": 1004,
+    "autoPoints": 111,
+    "bundleBytes": 2868686,
+    "bundleGzipBytes": 525576
+  }
+}
