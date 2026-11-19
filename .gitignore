@@ -19,3 +19,4 @@ Thumbs.db
 # Local
 *.log
 .env
+frontend/dist-artifact/

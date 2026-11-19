@@ -20,10 +20,11 @@ body { background: var(--bg); }
 button { font: inherit; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: .55; }
 
-.app { display: grid; grid-template-columns: 430px 1fr; height: 100vh; }
+.app { display: grid; grid-template-columns: 430px 1fr; height: 100%; }
 .panel { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 20px 18px 16px; display: flex; flex-direction: column; gap: 14px; z-index: 2; }
 .map-wrap { position: relative; }
 .map { height: 100%; width: 100%; background: #e9eef3; }
+.map.schematic { background-color: #eef1f5; background-image: radial-gradient(#cfd6e0 1px, transparent 1px); background-size: 18px 18px; }
 .map .leaflet-tile-pane { filter: grayscale(.9) brightness(1.04) contrast(.92); }
 
 /* Brand */

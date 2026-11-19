@@ -30,6 +30,8 @@ jobs:
         working-directory: frontend
       - run: npm test && npm run build
         working-directory: frontend
+        env:
+          VITE_REPO_URL: ${{ github.server_url }}/${{ github.repository }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -15,6 +15,9 @@ interface Props {
   onPick: (role: 'from' | 'to', id: string) => void;
 }
 
+// VITE_TILES=off builds a schematic map with no external tile requests (for sandboxed hosts).
+const TILES = import.meta.env.VITE_TILES !== 'off';
+
 const SEARCH = { settled: '#f59e0b', frontier: '#8b5cf6', current: '#111827', tree: '#f59e0b' };
 
 function FitTo({ bounds }: { bounds: LatLngBoundsExpression | null }) {
@@ -48,12 +51,12 @@ export function MetroMap({ lines, stations, from, to, legs, trace, showRoute, on
   const dimLines = (showRoute && !!legs?.length) || !!trace;
 
   return (
-    <MapContainer center={[17.42, 78.47]} zoom={12} className="map" zoomControl={false} preferCanvas={false}>
-      <TileLayer
+    <MapContainer center={[17.42, 78.47]} zoom={12} className={TILES ? 'map' : 'map schematic'} zoomControl={false} preferCanvas={false}>
+      {TILES && <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
         maxZoom={19}
-      />
+      />}
       <FitTo bounds={routeBounds ?? allBounds} />
 
       <Pane name="lines" style={{ zIndex: 410 }}>

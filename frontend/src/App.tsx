@@ -8,7 +8,8 @@ import { ComparePanel } from './components/ComparePanel';
 import { VisualiserControls } from './components/VisualiserControls';
 import { useTracePlayer } from './components/useTracePlayer';
 
-const REPO_URL = 'https://github.com/'; // replaced with the real repo URL in README after pushing
+// Set VITE_REPO_URL at build time (the Pages workflow does it automatically) to show a source link.
+const REPO_URL = import.meta.env.VITE_REPO_URL as string | undefined;
 
 function readUrl() {
   const p = new URLSearchParams(window.location.hash.replace(/^#\??/, ''));
@@ -130,7 +131,7 @@ export default function App() {
         <footer className="foot">
           <span>Engine: {backendLabel}</span>
           <span>Station order & fares (May 2025) verified · coordinates & segment times approximate</span>
-          <a href={REPO_URL} target="_blank" rel="noreferrer">Source & learning report ↗</a>
+          {REPO_URL && <a href={REPO_URL} target="_blank" rel="noreferrer">Source code & learning report ↗</a>}
         </footer>
       </aside>
 
