@@ -24,3 +24,31 @@ The frontend uses a copy of the same files.
   would always match "shortest distance" and teach nothing. See REPORT.md §5.
 * The Green Line extension to Falaknuma and the Phase-2 corridors are not included. They were
   not operational at the time of writing.
+
+---
+
+# Phase 2: multimodal planner data
+
+The registry is [pipeline/sources.json](pipeline/sources.json). Its live state (freshness, counts,
+warnings, overrides) is published with every build as `data/status.json` and shown in the app under
+**Data sources and freshness**. A history of data changes is kept in
+[pipeline/state/CHANGELOG.md](pipeline/state/CHANGELOG.md).
+
+| Source | What it gives | Status | Licence / attribution |
+|---|---|---|---|
+| [TGSRTC GTFS](https://mobilitydatabase.org/feeds/gtfs/mdb-3361) (Open Data Telangana, via Mobility Database mirror) | 5,028 stops, 1,031 routes, 44,892 daily trips | **Official, but stop times largely unusable**: 93% of trips (41,590) have physically impossible times, e.g. route 217C reaching 34:38 for a city run. The stop sequences and first departures are used; the other times are **re-timed** (estimated) | Open Data Telangana |
+| [HMRL GTFS](https://hmrl.co.in/open-data.html) (mirror `mdb-2457`) | 57 stations with official coordinates, 2,828 trips, fare table | **Official, good.** Two problems are corrected: (1) service `WK` was marked 7 days/week alongside separate SA/SU timetables, so a reviewed patch makes it Mon–Fri; (2) its fare table is the 2017 ₹10–60 chart, so the May 2025 chart overrides it | "Contains data provided by Hyderabad Metro Rail Ltd." |
+| [MMTS GTFS](https://www.transit.land/feeds/f-mmts~hyderabad) (mirror `mdb-921`) | 54 stations, 142 trains | **Expired 1 April 2020.** Used as the last known schedule; every MMTS leg is flagged "old timetable" in the UI. A newer MMTS feed added to the registry would replace it automatically | CDLA-Permissive-1.0 |
+| [OpenStreetMap](https://www.openstreetmap.org/copyright) via Overpass | Auto/taxi stands | Only **9** mapped in the whole city. Metro and MMTS stations are also treated as likely auto points | ODbL, © OpenStreetMap contributors |
+| `manual/metro-fares-2025.json` | Metro fare slabs | **Verified** (press reports of the HMRL chart) | n/a |
+| `manual/bus-fares.json` | City bus fares | **Approximate.** The Oct 2025 revision (₹15 minimum, +₹5 or +₹10 per stage) is reported by [Munsif Daily](https://munsifdaily.com/tgsrtc-increases-city-bus-fares-by-50-starting-from-today-october-6-2025-in-hyderabad/), but no full stage table is published | n/a |
+| `manual/mmts-fares.json` | MMTS fares ₹5–15 | **Approximate** boundaries ([SCR via Rail Analysis](https://news.railanalysis.com/insights-on-multi-modal-transport-service-mmts-of-south-central-railway/)) | n/a |
+| `manual/road-fares.json` | Auto meter tariff | **Verified (press):** ₹30 for the first 1.6 km, ₹14/km, 1.5× from 11 pm to 5 am ([NewsMeter](https://newsmeter.in/top-stories/telangana-auto-fares-rise-minimum-fare-fixed-at-30-check-new-rates-776679)) | n/a |
+| `manual/road-fares.json` | Cab (Uber/Ola-class) price | **Estimate only.** These companies publish no Hyderabad rate cards and offer no public price API, so the app shows a range | n/a |
+| `manual/traffic-profile.json` | Road speed by hour, bus speed factor, dwell | **Assumed, not measured** | n/a |
+| `manual/auto-points.csv` | Community-added share-auto points | Empty; add rows by pull request | n/a |
+| `manual/patches.json` | Reviewed corrections to source data | Each one is logged, and reported as obsolete once upstream fixes the problem | n/a |
+
+**Download note:** OpenCity (`data.opencity.in`) hosts the same feeds but sits behind a bot
+challenge, so the pipeline uses the Mobility Database mirror (`files.mobilitydatabase.org`), which
+allows automated downloads. To add a mirror, append its URL to the source's `urls` array.
