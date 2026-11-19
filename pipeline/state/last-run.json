@@ -7,7 +7,7 @@
       "attribution": "Contains data from TGSRTC via Open Data Telangana",
       "homepage": "https://mobilitydatabase.org/feeds/gtfs/mdb-3361",
       "licence": "Open Data Telangana (public domain per OpenCity listing)",
-      "state": "cached",
+      "state": "fresh",
       "sha": "e0a90bca1b9490a5cf92a805fecba7aca2c011527b2269904d54c5cc553be4d6",
       "url": "https://files.mobilitydatabase.org/mdb-3361/latest.zip",
       "validFrom": "20260201",
@@ -46,7 +46,7 @@
       "attribution": "Contains data provided by Hyderabad Metro Rail Ltd.",
       "homepage": "https://hmrl.co.in/open-data.html",
       "licence": "HMRL open data (redistribution with attribution)",
-      "state": "cached",
+      "state": "fresh",
       "sha": "ed801427b35ac0760092d13eccf65d71cd299910c2ab80e1de54cf21f33727f1",
       "url": "https://files.mobilitydatabase.org/mdb-2457/latest.zip",
       "validFrom": "20250405",
@@ -81,7 +81,7 @@
       "attribution": "Contains data from Open Data Telangana",
       "homepage": "https://www.transit.land/feeds/f-mmts~hyderabad",
       "licence": "CDLA-Permissive-1.0",
-      "state": "cached",
+      "state": "fresh",
       "sha": "fa71417fdb8e16a1740e99fcc7a2455ebadd3d8b3d77243a8e7ed5a75f6ba3df",
       "url": "https://files.mobilitydatabase.org/mdb-921/latest.zip",
       "validFrom": "20190401",
@@ -171,7 +171,7 @@
       "name": "Auto / taxi stands mapped in OpenStreetMap",
       "kind": "overpass",
       "attribution": "© OpenStreetMap contributors",
-      "state": "cached",
+      "state": "fresh",
       "counts": {
         "points": 9
       }
@@ -182,8 +182,8 @@
       "kind": "overpass",
       "attribution": "© OpenStreetMap contributors",
       "homepage": "https://www.openstreetmap.org/copyright",
-      "state": "cached",
-      "sha": "seed",
+      "state": "fresh",
+      "sha": "08f480165aa6ab040aa209386893f29ab7a9e9600ac8183859b60a83f9809191",
       "counts": {
         "places": 8344
       }

@@ -1,0 +1,11 @@
+# Data changelog
+
+Written by the daily refresh workflow. Newest entries at the bottom.
+
+## 2026-11-19
+- tgsrtc-gtfs: cached → fresh
+- hmrl-gtfs: cached → fresh
+- mmts-gtfs: cached → fresh
+- osm-auto-stands: cached → fresh
+- osm-places: new data published (version ? → ?)
+- osm-places: cached → fresh
