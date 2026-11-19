@@ -15,6 +15,7 @@ import { buildNetwork, resolveAttr, selectFeeds } from './merge.mjs';
 import { encodeNetwork } from './bundle.mjs';
 import { parseCsv } from './csv.mjs';
 import { diffStatus } from './status.mjs';
+import { extractPlaces } from './places.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, all) => a.startsWith('--')
@@ -120,6 +121,27 @@ network.stops.id.forEach((id, i) => {
   if (network.stops.mode[i] & 6) autoPoints.push([network.stops.lat[i] / 1e5, network.stops.lon[i] / 1e5, network.stops.name[i], 'station']);
 });
 
+// ---------- 4b. named places for search (areas, landmarks, hospitals, malls…) --------------
+// Not critical: without it, search still offers every stop and station.
+const placesSrc = manual('osm-places');
+const placesStatus = { id: placesSrc.id, name: placesSrc.name, kind: 'overpass', attribution: placesSrc.attribution, homepage: placesSrc.homepage };
+let places = [];
+for (const snap of [await fetchSource(placesSrc, CACHE, { offline, retries: 1 }), loadLastGood(placesSrc.id, CACHE)].filter(Boolean)) {
+  try {
+    const list = extractPlaces(JSON.parse(new TextDecoder().decode(snap.bytes)));
+    const prev = prevCounts(placesSrc.id)?.places;
+    if (list.length < 1000 || (prev && list.length < prev * 0.6)) throw new Error(`only ${list.length} places (previous ${prev ?? 'n/a'})`);
+    places = list;
+    if (!snap.lastGood) promoteLastGood(placesSrc.id, CACHE, snap.bytes, { sha: snap.sha, url: snap.url, fetchedAt: snap.fetchedAt });
+    Object.assign(placesStatus, { state: snap.lastGood ? 'last-good' : snap.fromSnapshot ? 'cached' : 'fresh', sha: snap.sha, fetchedAt: snap.fetchedAt, counts: { places: list.length } });
+    break;
+  } catch (e) {
+    placesStatus.rejected = [...(placesStatus.rejected ?? []), { sha: snap.sha, errors: [e.message] }];
+  }
+}
+if (!places.length) placesStatus.state = 'failed';
+status.sources.push(placesStatus);
+
 // ---------- 5. write bundle + status -------------------------------------------------------
 if (fatal.length) {
   status.ok = false; status.fatal = fatal;
@@ -138,12 +160,13 @@ const json = JSON.stringify(bundle);
 status.network = {
   stops: network.stops.id.length, routes: network.routes.length, patterns: network.patterns.length,
   trips: network.patterns.reduce((a, p) => a + p.t.length, 0), profiles: network.profiles.length,
-  autoPoints: autoPoints.length, bundleBytes: json.length, bundleGzipBytes: gzipSync(json).length,
+  autoPoints: autoPoints.length, places: places.length, bundleBytes: json.length, bundleGzipBytes: gzipSync(json).length,
 };
 status.changes = diffStatus(previous, status);
 
 mkdirSync(OUT, { recursive: true });
 writeFileSync(join(OUT, 'network.json'), json);
+writeFileSync(join(OUT, 'places.json'), JSON.stringify(places));
 writeFileSync(join(OUT, 'status.json'), JSON.stringify(status, null, 2));
 mkdirSync(STATE, { recursive: true });
 writeFileSync(join(STATE, 'last-run.json'), JSON.stringify(stableState(status), null, 2) + '\n');
