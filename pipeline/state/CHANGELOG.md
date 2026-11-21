@@ -15,3 +15,6 @@ Written by the daily refresh workflow. Newest entries at the bottom.
 
 ## 2026-11-20
 - osm-places: new data published (version ? → ?)
+
+## 2026-11-21
+- osm-places: new data published (version ? → ?)
