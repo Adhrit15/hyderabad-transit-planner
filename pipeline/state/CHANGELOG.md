@@ -24,3 +24,7 @@ Written by the daily refresh workflow. Newest entries at the bottom.
 
 ## 2026-11-23
 - osm-places: new data published (version ? → ?)
+
+## 2026-11-24
+- osm-auto-stands: fresh → cached
+- osm-places: new data published (version ? → ?)
