@@ -171,7 +171,7 @@
       "name": "Auto / taxi stands mapped in OpenStreetMap",
       "kind": "overpass",
       "attribution": "© OpenStreetMap contributors",
-      "state": "fresh",
+      "state": "cached",
       "counts": {
         "points": 9
       }
@@ -183,7 +183,7 @@
       "attribution": "© OpenStreetMap contributors",
       "homepage": "https://www.openstreetmap.org/copyright",
       "state": "fresh",
-      "sha": "3d9587e170c21c7cd7c2aca4b1e55cd14dc09941f38c597f5a9121a1044879b4",
+      "sha": "8d8244c1b4ceaec3a753ab62e6eb234a97c60f5b5833e27e806f37ba1a1fe033",
       "counts": {
         "places": 8345
       }
@@ -207,6 +207,6 @@
     "autoPoints": 120,
     "places": 8345,
     "bundleBytes": 2869107,
-    "bundleGzipBytes": 525706
+    "bundleGzipBytes": 525707
   }
 }
