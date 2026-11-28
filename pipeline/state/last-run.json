@@ -183,7 +183,7 @@
       "attribution": "© OpenStreetMap contributors",
       "homepage": "https://www.openstreetmap.org/copyright",
       "state": "fresh",
-      "sha": "c3e8b58cc41fdb3eb6f636633037c01dca46d6b8698f09a9f75a9f1b34aad9fa",
+      "sha": "c58873304d6add1ec6ce52c24dd71ac39297de51b7a6fa5eaf0c5fd2372cbc0f",
       "counts": {
         "places": 8346
       }
@@ -207,6 +207,6 @@
     "autoPoints": 120,
     "places": 8346,
     "bundleBytes": 2869107,
-    "bundleGzipBytes": 525707
+    "bundleGzipBytes": 525706
   }
 }
